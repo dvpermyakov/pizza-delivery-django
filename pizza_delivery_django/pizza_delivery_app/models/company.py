@@ -5,9 +5,9 @@ from pizza_delivery_app.methods import storage_disk
 
 
 class Company(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     chief_username = models.CharField(max_length=255)
-    image_url = models.URLField(max_length=255, null=True)
+    image_url = models.URLField(max_length=1000, null=True)
 
     @classmethod
     def create(cls, company_name, user, image):

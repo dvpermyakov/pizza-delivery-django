@@ -12,7 +12,7 @@ from pizza_delivery_app.methods import storage_disk
 class Venue(models.Model):
     company = models.ForeignKey(Company, related_name='venue')
     address = models.ForeignKey(Address)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=255)
     manager_username = models.CharField(max_length=255)
     first_category = models.ForeignKey(Category)

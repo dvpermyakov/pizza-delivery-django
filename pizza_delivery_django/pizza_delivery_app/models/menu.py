@@ -5,7 +5,7 @@ class Category(models.Model):
     name = models.CharField(max_length=255)
     parent = models.ForeignKey('self', related_name='child', null=True)
     description = models.CharField(max_length=255)
-    image_url = models.URLField(max_length=255, null=True)
+    image_url = models.URLField(max_length=1000, null=True)
 
     def get_first_category(self):
         category = self
@@ -35,7 +35,7 @@ class Product(models.Model):
     min_price = models.IntegerField(max_length=255)
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
-    image_url = models.URLField(max_length=255, null=True)
+    image_url = models.URLField(max_length=1000, null=True)
 
     def save_in_venues(self, creator_venue):
         from venue import VenueProduct
@@ -63,7 +63,7 @@ class Product(models.Model):
 class SingleModifier(models.Model):
     name = models.CharField(max_length=255)
     min_price = models.IntegerField(max_length=255, default=0)
-    image_url = models.URLField(max_length=255, null=True)
+    image_url = models.URLField(max_length=1000, null=True)
 
     def save_in_venues(self, creator_venue):
         for venue in creator_venue.first_category.get_venues():
@@ -77,13 +77,13 @@ class SingleModifier(models.Model):
 class GroupModifierItem(models.Model):
     name = models.CharField(max_length=255)
     min_price = models.IntegerField(max_length=255, default=0)
-    image_url = models.URLField(max_length=255, null=True)
+    image_url = models.URLField(max_length=1000, null=True)
 
 
 class GroupModifier(models.Model):
     name = models.CharField(max_length=255)
     choices = models.ForeignKey(GroupModifierItem, related_name='group_modifier')
-    image_url = models.URLField(max_length=255, null=True)
+    image_url = models.URLField(max_length=1000, null=True)
 
 
 class ModifierBinding(models.Model):

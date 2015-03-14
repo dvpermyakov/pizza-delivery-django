@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from django.core.context_processors import csrf
+from django.forms import ErrorList
 from pizza_delivery_app.forms import SignUpForm
 from django import forms
 from django.http import HttpResponseForbidden
@@ -40,6 +41,16 @@ class VenueSignUpForm(SignUpForm):
                 [(venue.id, venue.name) for venue in Venue.objects.filter(company=company)],
             )
         self.fields['first_category'].choices = choices
+
+    def is_valid(self):
+        valid = super(VenueSignUpForm, self).is_valid()
+        if not valid:
+            return valid
+        if Venue.objects.filter(name=self.cleaned_data['venue_name']).count() > 0:
+            self._errors['venue_name'] = ErrorList([u'Кофейня с таким именем уже существует'])
+            return False
+        return True
+
 
 @login_required
 @permission_required('pizza_delivery_app.crud_venues')

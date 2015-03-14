@@ -3,6 +3,7 @@
 from django.contrib.auth.models import User
 from django.contrib import auth
 from django.core.context_processors import csrf
+from django.forms import ErrorList
 from django.shortcuts import render, redirect
 from ....models import Company
 from pizza_delivery_app.permissions.groups import CHIEF_GROUP, MENU_READ_PERMISSIONS, MENU_CHANGE_PERMISSIONS,\
@@ -15,6 +16,15 @@ from django import forms
 class CompanySignUpForm(SignUpForm):
     company_name = forms.CharField(label=u'Название компании', max_length=40)
     image = forms.ImageField(label=u'Картинка', widget=forms.ClearableFileInput())
+
+    def is_valid(self):
+        valid = super(CompanySignUpForm, self).is_valid()
+        if not valid:
+            return valid
+        if Company.objects.filter(name=self.cleaned_data['company_name']).count() > 0:
+            self._errors['company_name'] = ErrorList([u'Компания с таким именем уже существует'])
+            return False
+        return True
 
 
 def signup(request):

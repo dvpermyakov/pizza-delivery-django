@@ -12,7 +12,6 @@ class SignUpForm(forms.Form):
     repeated_password = forms.CharField(label=u'Повторите пароль', widget=forms.PasswordInput())
 
     def is_valid(self):
-
         valid = super(SignUpForm, self).is_valid()
         if not valid:
             return valid
