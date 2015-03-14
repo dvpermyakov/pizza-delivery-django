@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    {% include 'web/header.html' %}
+    {% load customized %}
+    <h3>{{ category.name }}</h3>
+    <p>{{ category.description }}</p>
+    <div>
+        <table style="border-collapse:collapse; width:100%" border="1">
+            <tr>
+                <th>Название</th>
+                <th>Картинка</th>
+                <th>Описание</th>
+                {% if update %}
+                    <th>Изменить</th>
+                {% endif %}
+                {% if delete %}
+                    <th>Удалить</th>
+                {% endif %}
+            </tr>
+            {% for category in children_categories %}
+                <tr>
+                    <td><a href="{{ '/web/%s/menu'|percentage:venue_id|add:'/%s/category'|percentage:category.id }}">{{ category.name }}</a></td>
+                    <td><img src="{{ category.image_url }}"></td>
+                    <td>{{ category.description }}</td>
+                    {% if update %}
+                        <td>
+                            <form method="get">
+                                <button formaction="{{ '/web/%s/menu'|percentage:venue_id|add:'/%s/category/change'|percentage:category.id }}">
+                                    Изменить
+                                </button>
+                            </form>
+                        </td>
+                    {% endif %}
+                    {% if delete %}
+                        <td>
+                            <form method="post">
+                                {% csrf_token %}
+                                <button formaction="{{ '/web/%s/menu'|percentage:venue_id|add:'/%s/category/delete/'|percentage:category.id }}">
+                                    Удалить
+                                </button>
+                            </form>
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% if create %}
+        <br>
+        <div>
+            <form method="get">
+                <button formaction="{{ '/web/%s/menu'|percentage:venue_id|add:'/%s/category/create'|percentage:category.id }}">
+                    Добавить категорию
+                </button>
+            </form>
+        </div>
+    {% endif %}
+    {% if category.parent %}
+        <div>
+            <a href="{{ '/web/%s/menu'|percentage:venue_id|add:'/%s/category'|percentage:category.parent.id }}">На уровень выше</a>
+        </div>
+        <br>
+    {% endif %}
+    <div>
+        <table style="border-collapse:collapse; width:100%" border="1">
+            <tr>
+                <th>Название</th>
+                <th>Картинка</th>
+                <th>Описание</th>
+                <th>Цена</th>
+                <th>Статус</th>
+                {% if update %}
+                    <th>Изменить статус</th>
+                    <th>Изменить</th>
+                {% endif %}
+                {% if delete %}
+                    <th>Удалить</th>
+                {% endif %}
+            </tr>
+            {% for product in products %}
+                <tr>
+                    <td>{{ product.product.name }}</td>
+                    <td><img src="{{ product.product.image_url }}"></td>
+                    <td>{{ product.product.description }}</td>
+                    <td>{{ product.price }}</td>
+                    <td>{{ status_map|as_dict:product.status }}</td>
+                    {% if update %}
+                            <td>
+                                <form method="get">
+                                    <button formaction="{{ '/web/%s/menu'|percentage:venue_id|add:'/%s/product/change/status'|percentage:product.id }}">
+                                        Изменить статус
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
+                                <form method="get">
+                                    <button formaction="{{ '/web/%s/menu'|percentage:venue_id|add:'/%s/product/change'|percentage:product.product.id }}">
+                                        Изменить
+                                    </button>
+                                </form>
+                            </td>
+                        {% endif %}
+                        {% if delete %}
+                            <td>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <button formaction="{{ '/web/%s/menu'|percentage:venue_id|add:'/%s/product/delete/'|percentage:product.product.id }}">
+                                        Удалить
+                                    </button>
+                                </form>
+                            </td>
+                        {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% if create %}
+        <br>
+        <div>
+            <form method="get">
+                <button formaction="{{ '/web/%s/menu'|percentage:venue_id|add:'/%s/product/create'|percentage:category.id }}">
+                    Добавить продукт
+                </button>
+            </form>
+        </div>
+    {% endif %}
+</body>
+</html>

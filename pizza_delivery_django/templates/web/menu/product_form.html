@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Продукт</title>
+</head>
+<body>
+    {% load customized %}
+
+    <h3><ins>Продукт</ins></h3><br>
+    <form enctype="multipart/form-data" method="post">
+        {% csrf_token %}
+        <table>
+            {% for field in form %}
+                <tr>
+                    <td>
+                        {{ field.label_tag }}
+                    </td>
+                    <td>
+                        {{ field }}
+                    </td>
+                    {% for error in field.errors %}
+                        <td>{{ error }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+        <input type="submit" value="Отправить"/>
+        <a href="{{ '/web/%s/menu'|percentage:venue_id|add:'/%s/category/'|percentage:form.category_id.value }}">Назад</a>
+    </form>
+</body>
+</html>

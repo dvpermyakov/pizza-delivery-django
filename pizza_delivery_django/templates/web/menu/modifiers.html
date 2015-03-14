@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Все модификаторы</title>
+</head>
+<body>
+    {% include 'web/header.html' %}
+    {% load customized %}
+    <table>
+        <div>
+        <h3>Одиночные модификаторы</h3>
+        <table style="border-collapse:collapse; width:100%" border="1">
+            <tr>
+                <th>Название</th>
+                <th>Картинка</th>
+                <th>Минимальная цена</th>
+            </tr>
+            {% for modifier in single_modifiers %}
+                <tr>
+                    <td>{{ modifier.name }}</td>
+                    <td><img src="{{ modifier.image_url }}"></td>
+                    <td>{{ modifier.min_price }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% if create %}
+        <br>
+        <div>
+            <form method="get">
+                <button formaction="{{ '/web/%s/menu/modifiers/single_modifiers/create'|percentage:venue_id }}">
+                    Добавить одиночный модификатор
+                </button>
+            </form>
+        </div>
+    {% endif %}
+    <div>
+        <h3>Групповые модификаторы</h3>
+        <table style="border-collapse:collapse; width:100%" border="1">
+            <tr>
+                <th>Название группового модификатора</th>
+                <th>Картинка группового модификатора</th>
+                <th>Статус группового модификатора</th>
+                <th>Название варианта группового модификатора</th>
+                <th>Картинка</th>
+                <th>Цена</th>
+                <th>Статус</th>
+            </tr>
+            {% for modifier in group_modifiers %}
+                <tr>
+                    <td rowspan="{{ modifier.items|length }}">
+                        {{ modifier.modifier_binding.modifier.name }}
+                    </td>
+                    <td rowspan="{{ modifier.items|length }}">
+                        {{ modifier.modifier_binding.modifier.image_url }}
+                    </td>
+                    <td rowspan="{{ modifier.items|length }}">
+                        {{ modifier.status }}
+                    </td>
+                    {% for modifier_item in modifier.items %}
+                        <td>{{ modifier_item.group_modifier_item.name }}</td>
+                        <td>{{ modifier_item.group_modifier_item.image_url }}</td>
+                        <td>{{ modifier.price }}</td>
+                        <td><img src="{{ modifier_item.status }}"></td>
+                        </tr><tr>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    </table>
+</body>
+</html>
