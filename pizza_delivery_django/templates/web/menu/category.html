@@ -1,11 +1,96 @@
 <!DOCTYPE html>
 <html>
 <head>
+    {% load customized %}
     <title></title>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.change_btn').click(function(e){
+                e.preventDefault();
+
+                $.ajax({
+                    type: "POST",
+                    url: "{{ '/web/%s/menu'|percentage:venue_id|add:'/product/change/status/' }}",
+                    data: {
+                        venue_product_id: this.id,
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    },
+                    dataType: "json",
+                    success: function(json) {
+                        var jquery_tr_id = '#product_status_' + json.product_id;
+                        $(jquery_tr_id).html(json.status);
+                    }
+                });
+            });
+
+            function add_to_price(change, product_id){
+                $.ajax({
+                    type: "POST",
+                    url: "{{ '/web/%s/menu'|percentage:venue_id|add:'/product/change/price/' }}",
+                    data: {
+                        venue_product_id: product_id,
+                        change_in_price: change,
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    },
+                    dataType: "json",
+                    success: function(json) {
+                        var jquery_tr_id = '#product_price_' + json.product_id;
+                        $(jquery_tr_id).html(json.price);
+                    }
+                });
+            }
+
+            $('.price_up').click(function(e){
+                e.preventDefault();
+                add_to_price(parseInt($('#change_in_price').val()), this.id);
+            });
+            $('.price_down').click(function(e){
+                e.preventDefault();
+                add_to_price(parseInt($('#change_in_price').val()) * -1, this.id);
+            });
+
+            $('.category_delete_btn').click(function(e){
+                e.preventDefault();
+
+                $.ajax({
+                    type: "POST",
+                    url: "{{ '/web/%s/menu'|percentage:venue_id|add:'/category/delete/' }}",
+                    data: {
+                        category_id: this.id,
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    },
+                    dataType: "json",
+                    success: function(json) {
+                        var jquery_tr_id = '#category_tr_' + json.category_id;
+                        $(jquery_tr_id).remove();
+                    }
+                });
+            });
+
+            $('.product_delete_btn').click(function(e){
+                e.preventDefault();
+
+                $.ajax({
+                    type: "POST",
+                    url: "{{ '/web/%s/menu'|percentage:venue_id|add:'/product/delete/' }}",
+                    data: {
+                        product_id: this.id,
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    },
+                    dataType: "json",
+                    success: function(json) {
+                        var jquery_tr_id = '#product_tr_' + json.product_id;
+                        $(jquery_tr_id).remove();
+                    }
+                });
+            });
+
+        });
+    </script>
 </head>
 <body>
     {% include 'web/header.html' %}
-    {% load customized %}
     <h3>{{ category.name }}</h3>
     <p>{{ category.description }}</p>
     <div>
@@ -22,14 +107,14 @@
                 {% endif %}
             </tr>
             {% for category in children_categories %}
-                <tr>
+                <tr id="category_tr_{{ category.id }}">
                     <td><a href="{{ '/web/%s/menu'|percentage:venue_id|add:'/%s/category'|percentage:category.id }}">{{ category.name }}</a></td>
                     <td><img src="{{ category.image_url }}"></td>
                     <td>{{ category.description }}</td>
                     {% if update %}
                         <td>
                             <form method="get">
-                                <button formaction="{{ '/web/%s/menu'|percentage:venue_id|add:'/%s/category/change'|percentage:category.id }}">
+                                <button formaction="{{ '/web/%s/menu'|percentage:venue_id|add:'/%s/category/change/'|percentage:category.id }}">
                                     Изменить
                                 </button>
                             </form>
@@ -37,9 +122,9 @@
                     {% endif %}
                     {% if delete %}
                         <td>
-                            <form method="post">
+                            <form>
                                 {% csrf_token %}
-                                <button formaction="{{ '/web/%s/menu'|percentage:venue_id|add:'/%s/category/delete/'|percentage:category.id }}">
+                                <button class="category_delete_btn" id="{{ category.id }}">
                                     Удалить
                                 </button>
                             </form>
@@ -72,6 +157,7 @@
                 <th>Картинка</th>
                 <th>Описание</th>
                 <th>Цена</th>
+                <th>Изменить цену</th>
                 <th>Статус</th>
                 {% if update %}
                     <th>Изменить статус</th>
@@ -82,16 +168,24 @@
                 {% endif %}
             </tr>
             {% for product in products %}
-                <tr>
+                <tr id="product_tr_{{ product.product.id }}">
                     <td>{{ product.product.name }}</td>
                     <td><img src="{{ product.product.image_url }}"></td>
                     <td>{{ product.product.description }}</td>
-                    <td>{{ product.price }}</td>
-                    <td>{{ status_map|as_dict:product.status }}</td>
+                    <td id="product_price_{{ product.id }}">{{ product.price }}</td>
+                    <td>
+                        <form>
+                            {% csrf_token %}
+                            <label>Введите число<input type="number" id="change_in_price"></label>
+                            <input class="price_up" type="button" value="+" id={{ product.id }}>
+                            <input class="price_down" type="button" value="-" id={{ product.id }}>
+                        </form>
+                    </td>
+                    <td id="product_status_{{ product.id }}">{{ status_map|as_dict:product.status }}</td>
                     {% if update %}
                             <td>
                                 <form method="get">
-                                    <button formaction="{{ '/web/%s/menu'|percentage:venue_id|add:'/%s/product/change/status'|percentage:product.id }}">
+                                    <button class="change_btn" id="{{ product.id }}">
                                         Изменить статус
                                     </button>
                                 </form>
@@ -106,9 +200,9 @@
                         {% endif %}
                         {% if delete %}
                             <td>
-                                <form method="post">
+                                <form>
                                     {% csrf_token %}
-                                    <button formaction="{{ '/web/%s/menu'|percentage:venue_id|add:'/%s/product/delete/'|percentage:product.product.id }}">
+                                    <button class="product_delete_btn" id="{{ product.product.id }}">
                                         Удалить
                                     </button>
                                 </form>

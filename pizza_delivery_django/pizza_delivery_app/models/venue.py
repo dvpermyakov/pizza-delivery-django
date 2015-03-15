@@ -1,7 +1,7 @@
 # coding: utf-8
 
 from django.db import models
-from address import Address
+from address import Address, GeoRib
 from menu import Category, Product, ModifierBinding, GroupModifierBinding, GroupModifierItem, SingleModifier,\
     GroupModifier
 from collections import deque
@@ -16,6 +16,7 @@ class Venue(models.Model):
     description = models.CharField(max_length=255)
     manager_username = models.CharField(max_length=255)
     first_category = models.ForeignKey(Category)
+    first_rib = models.ForeignKey(GeoRib, null=True)
     single_modifiers = models.ManyToManyField(SingleModifier)
     group_modifiers = models.ManyToManyField(GroupModifier)
 
@@ -88,6 +89,10 @@ class VenueProduct(models.Model):
     def change_status(self):
         self.status += 1
         self.status %= 2
+        self.save()
+
+    def change_price(self, change):
+        self.price += change
         self.save()
 
     def dict(self):

@@ -23,14 +23,18 @@ urlpatterns = patterns('',
     url(r'^web/(?P<venue_id>\d+)/menu/(?P<category_id>\d+)/category/$', web.category),
     url(r'^web/(?P<venue_id>\d+)/menu/(?P<category_id>\d+)/category/create/$', web.create_category),
     url(r'^web/(?P<venue_id>\d+)/menu/(?P<category_id>\d+)/category/change/$', web.change_category),
-    url(r'^web/(?P<venue_id>\d+)/menu/(?P<category_id>\d+)/category/delete/$', web.delete_category),
+    url(r'^web/(?P<venue_id>\d+)/menu/category/delete/$', web.delete_category),
 
     url(r'^web/(?P<venue_id>\d+)/menu/(?P<category_id>\d+)/product/create/$', web.create_product),
     url(r'^web/(?P<venue_id>\d+)/menu/(?P<product_id>\d+)/product/change/$', web.change_product),
-    url(r'^web/(?P<venue_id>\d+)/menu/(?P<product_id>\d+)/product/delete/$', web.delete_product),
-    url(r'^web/(?P<venue_id>\d+)/menu/(?P<venue_product_id>\d+)/product/change/status/$', web.change_status),
+    url(r'^web/(?P<venue_id>\d+)/menu/product/delete/$', web.delete_product),
 
-    url(r'^web/(?P<venue_id>\d+)/menu/modifiers$', web.modifiers),
-    url(r'^web/(?P<venue_id>\d+)/menu/active_modifiers$', web.modifiers),
+    url(r'^web/(?P<venue_id>\d+)/menu/product/change/status/$', web.change_status),
+    url(r'^web/(?P<venue_id>\d+)/menu/product/change/price/$', web.change_price),
+
+    url(r'^web/(?P<venue_id>\d+)/menu/modifiers/$', web.modifiers),
+    url(r'^web/(?P<venue_id>\d+)/menu/active_modifiers/$', web.modifiers),
     url(r'^web/(?P<venue_id>\d+)/menu/modifiers/single_modifiers/create$', web.create_single_modifier),
+    url(r'^web/(?P<venue_id>\d+)/menu/modifiers/(?P<modifier_id>\d+)/single_modifiers/change$', web.create_single_modifier),
+    url(r'^web/(?P<venue_id>\d+)/menu/modifiers/single_modifiers/delete$', web.create_single_modifier),
 )
