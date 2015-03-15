@@ -18,7 +18,8 @@ class Category(models.Model):
         return Venue.objects.filter(first_category=self.get_first_category())
 
     def delete_category(self):
-        self.product_category.all().delete()
+        for product in self.product_category.all():
+            product.full_delete()
         for child in self.child.all():
             child.delete_category()
         self.delete()
