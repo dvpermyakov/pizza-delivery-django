@@ -11,3 +11,13 @@ class Address(models.Model):
 
     def to_str(self):
         return '%s, %s, %s' % (self.city, self.street, self.home)
+
+
+class GeoRib(models.Model):
+    parent = models.ForeignKey('self', related_name='child', null=True)
+
+
+class GeoPoint(models.Model):
+    lat = models.FloatField(max_length=255)
+    lon = models.FloatField(max_length=255)
+    rib = models.ForeignKey(GeoRib)
