@@ -1,7 +1,7 @@
 # coding: utf-8
 
 from django.core.context_processors import csrf
-from django.forms import ErrorList
+from django.forms.util import ErrorList
 from pizza_delivery_app.forms import SignUpForm
 from django import forms
 from django.http import HttpResponseForbidden

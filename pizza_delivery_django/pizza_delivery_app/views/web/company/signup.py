@@ -3,7 +3,7 @@
 from django.contrib.auth.models import User
 from django.contrib import auth
 from django.core.context_processors import csrf
-from django.forms import ErrorList
+from django.forms.util import ErrorList
 from django.shortcuts import render, redirect
 from ....models import Company
 from pizza_delivery_app.permissions.groups import CHIEF_GROUP, MENU_READ_PERMISSIONS, MENU_CHANGE_PERMISSIONS,\
