@@ -1,5 +1,6 @@
 import os
 import requests
+import logging
 
 ACCESS_TOKEN = 'd74d121660d8482b92a2239b44356fc1'
 BASE_URL = 'https://cloud-api.yandex.net/v1/disk'
@@ -22,7 +23,9 @@ def _get_upload_url(folder, name):
     url = '%s/resources/upload/' % BASE_URL
     response = requests.get(url, params=params, headers=headers).json()
 
-    return response['href']
+    logging.warning(response)
+
+    return response.get('href')
 
 
 def _get_public_preview(folder, name):
@@ -37,7 +40,9 @@ def _get_public_preview(folder, name):
     url = '%s/resources/' % BASE_URL
     response = requests.get(url, params=params, headers=headers).json()
 
-    return response['preview']
+    logging.warning(response)
+
+    return response.get('preview')
 
 
 def _publish_file(folder, name):  # It returns meta-info url
@@ -51,11 +56,17 @@ def _publish_file(folder, name):  # It returns meta-info url
     url = '%s/resources/publish/' % BASE_URL
     requests.put(url, params=params, headers=headers).json()
 
-    return _get_public_preview(folder, name)
+    preview = None
+    while not preview:
+        preview = _get_public_preview(folder, name)
+    return preview
 
 
 def _upload_file(folder, name, file_):
     url = _get_upload_url(folder, name)
+
+    if not url:
+        return None
 
     requests.post(url, files={
         'file': file_
@@ -66,14 +77,14 @@ def _upload_file(folder, name, file_):
 
 def upload_company_file(company, type_, id_, file_):
     folder = '%s_%s_%s' % (COMPANY, company.name, company.id)
-    name = '%s_%s.%s' % (type_, id_, os.path.splitext(file_.name)[1])
+    name = '%s_%s%s' % (type_, id_, os.path.splitext(file_.name)[1])
     return _upload_file(folder, name, file_)
 
 
 def upload_venue_file(venue, type_, id_, file_):
     company = venue.company
     folder = '%s_%s_%s/%s_%s_%s' % (COMPANY, company.name, company.id, VENUE, venue.name, venue.id)
-    name = '%s_%s.%s' % (type_, id_, os.path.splitext(file_.name)[1])
+    name = '%s_%s%s' % (type_, id_, os.path.splitext(file_.name)[1])
     return _upload_file(folder, name, file_)
 
 
