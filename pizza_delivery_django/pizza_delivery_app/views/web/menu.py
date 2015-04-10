@@ -4,13 +4,13 @@ from django.contrib.auth.decorators import login_required, permission_required
 from pizza_delivery_app.models import Company, Category, Product
 from django.http import HttpResponseForbidden, HttpResponseBadRequest, HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import render, redirect
-from pizza_delivery_app.models.venue import Venue, VenueProduct, VenueModifier, VenueGroupModifier
-from pizza_delivery_app.models.menu import SingleModifier
+from pizza_delivery_app.models.venue import Venue, VenueProduct
+from pizza_delivery_app.models.menu import SingleModifier, GroupModifier, GroupModifierItem, ModifierBinding, \
+    GroupModifierBinding
 from django.core.context_processors import csrf
 from django import forms
 from pizza_delivery_app.methods import storage_disk
 import json
-import  logging
 
 @login_required
 def menu(request, venue_id):
@@ -181,7 +181,7 @@ class ProductForm(forms.Form):
     name = forms.CharField(label=u'Название', widget=forms.TextInput())
     description = forms.CharField(label=u'Описание', widget=forms.Textarea())
     min_price = forms.IntegerField(label=u'Минимальная цена', widget=forms.NumberInput())
-    image = forms.ImageField(label=u'Картинка', widget=forms.ClearableFileInput())
+    image = forms.ImageField(label=u'Картинка', widget=forms.ClearableFileInput(), required=False)
 
     def hide_min_price(self):
         self.fields['min_price'].widget = forms.HiddenInput()
@@ -194,16 +194,22 @@ def save_product(form, venue):
         product = Product.objects.get(id=form.cleaned_data['product_id'])
         product.name = form.cleaned_data['name']
         product.description = form.cleaned_data['description']
+        if form.cleaned_data['image']:
+            storage_disk.delete_file(venue, storage_disk.PRODUCT, product.id)
+            image_url = storage_disk.upload_venue_file(venue, storage_disk.PRODUCT, product.id,
+                                                       form.cleaned_data['image'])
+            product.image_url = image_url
         product.save()
     else:
         product = Product(name=form.cleaned_data['name'], description=form.cleaned_data['description'],
                           min_price=form.cleaned_data['min_price'],
                           category=Category.objects.get(id=form.cleaned_data['category_id']))
         product.save()
-        image_url = storage_disk.upload_venue_file(venue, storage_disk.PRODUCT, product.id,
-                                                   form.cleaned_data['image'])
-        product.image_url = image_url
-        product.save()
+        if form.cleaned_data['image']:
+            image_url = storage_disk.upload_venue_file(venue, storage_disk.PRODUCT, product.id,
+                                                       form.cleaned_data['image'])
+            product.image_url = image_url
+            product.save()
         product.save_in_venues(venue)
 
 
@@ -291,7 +297,6 @@ def delete_product(request, venue_id):
 
         if request.method == 'POST':
             product_id = request.POST.get('product_id')
-            logging.info(product_id)
             product = Product.objects.get(id=product_id)
             product.full_delete()
             return HttpResponse(json.dumps({
@@ -360,9 +365,12 @@ def modifiers(request, venue_id):
         user_company = Company.get_by_username(request.user.username)
         if venue.company != user_company:
             return HttpResponseForbidden()
+        group_modifiers = venue.group_modifiers.all()
+        for modifier in group_modifiers:
+            modifier.choices = modifier.group_modifier_item.all()
         return render(request, 'web/menu/modifiers.html', {
             'single_modifiers': venue.single_modifiers.all(),
-            'group_modifiers': venue.group_modifiers.all(),
+            'group_modifiers': group_modifiers,
             'venue_id': venue.id,
             'create': request.user.has_perm('pizza_delivery_app.update_single_modifiers'),
             'update': request.user.has_perm('pizza_delivery_app.update_single_modifiers'),
@@ -388,12 +396,17 @@ def save_single_modifier(form, venue):
     if form.cleaned_data['single_modifier_id']:
         modifier = SingleModifier.objects.get(id=form.cleaned_data['single_modifier_id'])
         modifier.name = form.cleaned_data['name']
+        if form.cleaned_data['image']:
+            storage_disk.delete_file(venue, storage_disk.SINGLE_MODIFIER, modifier.id)
+            image_url = storage_disk.upload_venue_file(venue, storage_disk.SINGLE_MODIFIER, modifier.id,
+                                                       form.cleaned_data['image'])
+            modifier.image_url = image_url
         modifier.save()
     else:
         modifier = SingleModifier(name=form.cleaned_data['name'], min_price=form.cleaned_data['min_price'])
         modifier.save()
         if form.cleaned_data['image']:
-            image_url = storage_disk.upload_venue_file(venue, storage_disk.MODIFIER, modifier.id,
+            image_url = storage_disk.upload_venue_file(venue, storage_disk.SINGLE_MODIFIER, modifier.id,
                                                        form.cleaned_data['image'])
             modifier.image_url = image_url
             modifier.save()
@@ -431,7 +444,7 @@ def create_single_modifier(request, venue_id):
 
 @login_required
 @permission_required('pizza_delivery_app.update_single_modifiers')
-def change_modifier(request, venue_id, modifier_id):
+def change_single_modifier(request, venue_id, modifier_id):
     def general_render(form):
         values = {
             'form': form
@@ -456,12 +469,239 @@ def change_modifier(request, venue_id, modifier_id):
             form.hide_min_price()
             return general_render(form)
         elif request.method == 'POST':
-            form = ProductForm(request.POST)
+            form = SingleModifierForm(request.POST, request.FILES)
             form.hide_min_price()
             if form.is_valid():
-                save_product(form, venue)
-                return redirect('/web/%s/menu/%s/category' % (venue_id, product.category.id))
+                save_single_modifier(form, venue)
+                return redirect('/web/%s/menu/modifiers' % venue.id)
             else:
                 return general_render(form)
     except Category.DoesNotExist, Company.DoesNotExist:
+        return HttpResponseBadRequest()
+
+
+class GroupModifierForm(forms.Form):
+    group_modifier_id = forms.CharField(label=u'', widget=forms.HiddenInput(), required=False)
+    name = forms.CharField(label=u'Название', widget=forms.TextInput())
+    image = forms.ImageField(label=u'Картинка', widget=forms.ClearableFileInput(), required=False)
+
+
+def save_group_modifier(form, venue):
+    if form.cleaned_data['group_modifier_id']:
+        modifier = GroupModifier.objects.get(id=form.cleaned_data['group_modifier_id'])
+        modifier.name = form.cleaned_data['name']
+        if form.cleaned_data['image']:
+            storage_disk.delete_file(venue, storage_disk.GROUP_MODIFIER, modifier.id)
+            image_url = storage_disk.upload_venue_file(venue, storage_disk.GROUP_MODIFIER, modifier.id,
+                                                       form.cleaned_data['image'])
+            modifier.image_url = image_url
+        modifier.save()
+    else:
+        modifier = GroupModifier(name=form.cleaned_data['name'])
+        modifier.save()
+        if form.cleaned_data['image']:
+            image_url = storage_disk.upload_venue_file(venue, storage_disk.GROUP_MODIFIER, modifier.id,
+                                                       form.cleaned_data['image'])
+            modifier.image_url = image_url
+            modifier.save()
+        modifier.save_in_venues(venue)
+
+
+@login_required
+@permission_required('pizza_delivery_app.create_single_modifiers')
+def create_group_modifier(request, venue_id):
+    def general_render(form):
+        values = {
+            'form': form
+        }
+        values.update(csrf(request))
+        return render(request, 'web/menu/modifier_form.html', values)
+
+    try:
+        venue = Venue.objects.get(id=venue_id)
+        user_company = Company.get_by_username(request.user.username)
+        if venue.company != user_company:
+            return HttpResponseForbidden()
+
+        if request.method == 'GET':
+            return general_render(GroupModifierForm())
+        elif request.method == 'POST':
+            form = GroupModifierForm(request.POST, request.FILES)
+            if form.is_valid():
+                save_group_modifier(form, venue)
+                return redirect('/web/%s/menu/modifiers' % venue.id)
+            else:
+                return general_render(form)
+    except Company.DoesNotExist:
+        return HttpResponseBadRequest()
+
+
+@login_required
+@permission_required('pizza_delivery_app.update_single_modifiers')
+def change_group_modifier(request, venue_id, modifier_id):
+    def general_render(form):
+        values = {
+            'form': form
+        }
+        values.update(csrf(request))
+        return render(request, 'web/menu/modifier_form.html', values)
+
+    try:
+        venue = Venue.objects.get(id=venue_id)
+        user_company = Company.get_by_username(request.user.username)
+        if venue.company != user_company:
+            return HttpResponseForbidden()
+
+        modifier = GroupModifier.objects.get(id=modifier_id)
+
+        if request.method == 'GET':
+            form = GroupModifierForm(initial={
+                'group_modifier_id': modifier.id,
+                'name': modifier.name
+            })
+            return general_render(form)
+        elif request.method == 'POST':
+            form = GroupModifierForm(request.POST, request.FILES)
+            if form.is_valid():
+                save_group_modifier(form, venue)
+                return redirect('/web/%s/menu/modifiers' % venue.id)
+            else:
+                return general_render(form)
+    except Category.DoesNotExist, Company.DoesNotExist:
+        return HttpResponseBadRequest()
+
+
+class GroupModifierItemForm(GroupModifierForm):
+    group_modifier_item_id = forms.CharField(label=u'', widget=forms.HiddenInput(), required=False)
+    min_price = forms.IntegerField(label=u'Минимальная цена', widget=forms.NumberInput())
+
+    def hide_min_price(self):
+        self.fields['min_price'].widget = forms.HiddenInput()
+        self.fields['min_price'].label = u''
+        self.fields['min_price'].required = False
+
+
+def save_group_modifier_item(form, venue):
+    if form.cleaned_data['group_modifier_item_id']:
+        modifier = GroupModifierItem.objects.get(id=form.cleaned_data['group_modifier_item_id'])
+        modifier.name = form.cleaned_data['name']
+        if form.cleaned_data['image']:
+            storage_disk.delete_file(venue, storage_disk.GROUP_MODIFIER, modifier.id)
+            image_url = storage_disk.upload_venue_file(venue, storage_disk.GROUP_MODIFIER, modifier.id,
+                                                       form.cleaned_data['image'])
+            modifier.image_url = image_url
+        modifier.save()
+    else:
+        modifier = GroupModifierItem(name=form.cleaned_data['name'], min_price=form.cleaned_data['min_price'])
+        modifier.group_modifier = GroupModifier.objects.get(id=form.cleaned_data['group_modifier_id'])
+        modifier.save()
+        if form.cleaned_data['image']:
+            image_url = storage_disk.upload_venue_file(venue, storage_disk.GROUP_MODIFIER, modifier.id,
+                                                       form.cleaned_data['image'])
+            modifier.image_url = image_url
+            modifier.save()
+
+
+@login_required
+@permission_required('pizza_delivery_app.create_single_modifiers')
+def create_group_modifier_item(request, venue_id):
+    def general_render(form):
+        values = {
+            'form': form
+        }
+        values.update(csrf(request))
+        return render(request, 'web/menu/modifier_form.html', values)
+
+    try:
+        venue = Venue.objects.get(id=venue_id)
+        user_company = Company.get_by_username(request.user.username)
+        if venue.company != user_company:
+            return HttpResponseForbidden()
+
+        if request.method == 'GET':
+            return general_render(GroupModifierItemForm(initial={
+                'group_modifier_id': request.GET.get('group_modifier_id')
+            }))
+        elif request.method == 'POST':
+            form = GroupModifierItemForm(request.POST, request.FILES)
+            if form.is_valid():
+                save_group_modifier_item(form, venue)
+                return redirect('/web/%s/menu/modifiers' % venue.id)
+            else:
+                return general_render(form)
+    except Company.DoesNotExist:
+        return HttpResponseBadRequest()
+
+
+@login_required
+def select_products_for_single_modifier(request, venue_id, modifier_id):
+    def general_render():
+        values = {
+            'products': products,
+            'modifier': modifier
+        }
+        values.update(csrf(request))
+        return render(request, 'web/menu/select_products.html', values)
+
+    try:
+        venue = Venue.objects.get(id=venue_id)
+        user_company = Company.get_by_username(request.user.username)
+        if venue.company != user_company:
+            return HttpResponseForbidden()
+        modifier = SingleModifier.objects.get(id=modifier_id)
+        bindings = ModifierBinding.objects.filter(modifier=modifier)
+        binding_products = [binding.product for binding in bindings]
+        if request.method == 'GET':
+            products = venue.get_products_from_menu(venue_product=False)
+            for product in products:
+                product.has_modifier = product in binding_products
+            return general_render()
+        elif request.method == 'POST':
+            for product in venue.get_products_from_menu(venue_product=False):
+                confirmed = bool(request.POST.get(str(product.id)))
+                if product in binding_products:
+                    if not confirmed:
+                        bindings[binding_products.index(product)].delete()
+                else:
+                    if confirmed:
+                        ModifierBinding(product=product, modifier=modifier).save()
+            return redirect('/web/%s/menu/modifiers' % venue.id)
+    except Company.DoesNotExist:
+        return HttpResponseBadRequest()
+
+
+@login_required
+def select_products_for_group_modifier(request, venue_id, modifier_id):
+    def general_render():
+        values = {
+            'products': products,
+            'modifier': modifier
+        }
+        values.update(csrf(request))
+        return render(request, 'web/menu/select_products.html', values)
+
+    try:
+        venue = Venue.objects.get(id=venue_id)
+        user_company = Company.get_by_username(request.user.username)
+        if venue.company != user_company:
+            return HttpResponseForbidden()
+        modifier = GroupModifier.objects.get(id=modifier_id)
+        bindings = GroupModifierBinding.objects.filter(modifier=modifier)
+        binding_products = [binding.product for binding in bindings]
+        if request.method == 'GET':
+            products = venue.get_products_from_menu(venue_product=False)
+            for product in products:
+                product.has_modifier = product in binding_products
+            return general_render()
+        elif request.method == 'POST':
+            for product in venue.get_products_from_menu(venue_product=False):
+                confirmed = bool(request.POST.get(str(product.id)))
+                if product in binding_products:
+                    if not confirmed:
+                        bindings[binding_products.index(product)].delete()
+                else:
+                    if confirmed:
+                        GroupModifierBinding(product=product, modifier=modifier).save()
+            return redirect('/web/%s/menu/modifiers' % venue.id)
+    except Company.DoesNotExist:
         return HttpResponseBadRequest()

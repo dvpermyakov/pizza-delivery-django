@@ -29,3 +29,8 @@ class Company(models.Model):
                 return Venue.objects.get(manager_username=username).company
             except Venue.DoesNotExist:
                 return None
+
+    def dict(self):
+        return {
+            'name': self.name
+        }

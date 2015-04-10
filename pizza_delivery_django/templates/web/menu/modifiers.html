@@ -2,6 +2,12 @@
 <html>
 <head>
     <title>Все модификаторы</title>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+
+        });
+    </script>
 </head>
 <body>
     {% include 'web/header.html' %}
@@ -10,25 +16,34 @@
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
             <th>Название</th>
-            <th>Картинка</th>
-            <th>Минимальная цена</th>
             {% if update %}
+                <th>Продукты</th>
                 <th>Изменить</th>
             {% endif %}
-            {% if delete %}
-                <th>Удалить</th>
-            {% endif %}
+            <th>Картинка</th>
+            <th>Минимальная цена</th>
         </tr>
         {% for modifier in single_modifiers %}
             <tr>
                 <td>{{ modifier.name }}</td>
+                {% if update %}
+                    <td>
+                        <form method="get">
+                            <button formaction="{{ '/web/%s/menu/modifiers'|percentage:venue_id|add:'/%s/single_modifier/select_products/'|percentage:modifier.id}}">
+                                Выбрать
+                            </button>
+                        </form>
+                    </td>
+                    <td>
+                        <form method="get">
+                            <button formaction="{{ '/web/%s/menu/modifiers'|percentage:venue_id|add:'/%s/single_modifier/change/'|percentage:modifier.id}}">
+                                Изменить
+                            </button>
+                        </form>
+                    </td>
+                {% endif %}
                 <td><img src="{{ modifier.image_url }}"></td>
                 <td>{{ modifier.min_price }}</td>
-                <td>
-                    <button formaction="{{ '/web/%s/menu'|percentage:venue_id|add:'/%s/product/change'|percentage:product.product.id }}">
-                        Изменить
-                    </button>
-                </td>
             </tr>
         {% endfor %}
     </table>
@@ -46,6 +61,10 @@
     <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
             <th>Название группового модификатора</th>
+            {% if update %}
+                <th>Продукты</th>
+                <th>Изменить</th>
+            {% endif %}
             <th>Картинка группового модификатора</th>
             <th>Название варианта группового модификатора</th>
             <th>Картинка варианта группового модификатора</th>
@@ -53,16 +72,41 @@
         </tr>
         {% for modifier in group_modifiers %}
             <tr>
-                <td rowspan="{{ modifier.items|length }}">
+                <td rowspan="{{ modifier.choices|length|add:'1' }}">
                     {{ modifier.name }}
                 </td>
-                <td rowspan="{{ modifier.items|length }}">
-                    {{ modifier.image_url }}
+                {% if update %}
+                    <td rowspan="{{ modifier.choices|length|add:'1' }}">
+                        <form method="get">
+                            <button formaction="{{ '/web/%s/menu/modifiers'|percentage:venue_id|add:'/%s/group_modifier/select_products/'|percentage:modifier.id}}">
+                                Выбрать
+                            </button>
+                        </form>
+                    </td>
+                    <td rowspan="{{ modifier.choices|length|add:'1' }}">
+                        <form method="get">
+                            <button formaction="{{ '/web/%s/menu/modifiers'|percentage:venue_id|add:'/%s/group_modifier/change/'|percentage:modifier.id}}">
+                                Изменить
+                            </button>
+                        </form>
+                    </td>
+                {% endif %}
+                <td rowspan="{{ modifier.choices|length|add:'1' }}">
+                    <img src="{{ modifier.image_url }}">
+                </td>
+                <td colspan="3">
+                    <form method="get">
+                        <input type="text" name="group_modifier_id" value="{{ modifier.id }}" hidden>
+                        <button formaction="{{ '/web/%s/menu/modifiers/'|percentage:venue_id|add:'group_modifier_items/create/' }}">
+                            Добавить
+                        </button>
+                    </form>
                 </td>
                 {% for modifier_item in modifier.choices %}
+                    </tr><tr>
                     <td>{{ modifier_item.name }}</td>
                     <td><img src="{{ modifier_item.image_url }}"></td>
-                    <td>{{ modifier_item.price }}</td>
+                    <td>{{ modifier_item.min_price }}</td>
                 {% endfor %}
             </tr>
         {% endfor %}
@@ -71,7 +115,7 @@
         <br>
         <div>
             <form method="get">
-                <button formaction="{{ '/web/%s/menu/modifiers/single_modifiers/create'|percentage:venue_id }}">
+                <button formaction="{{ '/web/%s/menu/modifiers/group_modifiers/create'|percentage:venue_id }}">
                     Добавить групповой модификатор
                 </button>
             </form>

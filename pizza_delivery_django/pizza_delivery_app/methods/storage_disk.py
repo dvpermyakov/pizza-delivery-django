@@ -9,7 +9,9 @@ COMPANY = 'company'
 VENUE = 'venue'
 CATEGORY = 'category'
 PRODUCT = 'product'
-MODIFIER = 'modifier'
+SINGLE_MODIFIER = 'single_modifier'
+GROUP_MODIFIER = 'group_modifier'
+GROUP_MODIFIER_ITEM = 'group_modifier_item'
 
 
 def _get_upload_url(folder, name):

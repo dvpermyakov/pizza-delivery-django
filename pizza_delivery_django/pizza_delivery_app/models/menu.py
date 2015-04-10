@@ -71,27 +71,47 @@ class SingleModifier(models.Model):
             venue.single_modifiers.add(self)
             venue.save()
 
-    def full_delete(self):
+    def full_delete(self):  # TODO: fill it
         pass
+
+    def dict(self):
+        return {
+            'name': self.name,
+            'image_url': self.image_url
+        }
+
+
+class GroupModifier(models.Model):
+    name = models.CharField(max_length=255)
+    image_url = models.URLField(max_length=1000, null=True)
+
+    def save_in_venues(self, creator_venue):
+        for venue in creator_venue.first_category.get_venues():
+            venue.group_modifiers.add(self)
+            venue.save()
 
 
 class GroupModifierItem(models.Model):
     name = models.CharField(max_length=255)
     min_price = models.IntegerField(max_length=255, default=0)
     image_url = models.URLField(max_length=1000, null=True)
-
-
-class GroupModifier(models.Model):
-    name = models.CharField(max_length=255)
-    choices = models.ForeignKey(GroupModifierItem, related_name='group_modifier')
-    image_url = models.URLField(max_length=1000, null=True)
+    group_modifier = models.ForeignKey(GroupModifier, related_name='group_modifier_item')
 
 
 class ModifierBinding(models.Model):
     product = models.ForeignKey(Product)
     modifier = models.ForeignKey(SingleModifier)
 
+    def save_in_venues(self):  # TODO: fill this code!
+        pass
+
+    def dict(self):
+        return self.modifier.dict()
+
 
 class GroupModifierBinding(models.Model):
     product = models.ForeignKey(Product)
     modifier = models.ForeignKey(GroupModifier)
+
+    def save_in_venues(self):  # TODO: fill this code!
+        pass

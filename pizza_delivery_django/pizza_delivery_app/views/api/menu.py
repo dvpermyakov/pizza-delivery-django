@@ -1,10 +1,11 @@
 # coding: utf-8
 from django.http import JsonResponse, HttpResponseBadRequest
-from pizza_delivery_app.models import Company
-import logging
+from pizza_delivery_app.models import Venue
 
 
 def _parse_menu_category(category):
+    import logging
+    logging.error(category['products'])
     category['products'] = [product.dict() for product in category['products']]
     if not category['products']:
         del category['products']
@@ -16,16 +17,15 @@ def _parse_menu_category(category):
 
 
 def menu(request):
-    company_id = request.GET.get('company_id')
-    if company_id:
-        company_id = int(company_id)
+    venue_id = request.GET.get('venue_id')
+    if venue_id:
+        venue_id = int(venue_id)
         try:
-            company = Company.objects.get(id=company_id)
-        except Company.DoesNotExist:
+            venue = Venue.objects.get(id=venue_id)
+            return JsonResponse({
+                'menu': _parse_menu_category(venue.get_menu())
+            })
+        except Venue.DoesNotExist:
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
-
-    return JsonResponse({
-        'menu': _parse_menu_category(company.get_menu())
-    })

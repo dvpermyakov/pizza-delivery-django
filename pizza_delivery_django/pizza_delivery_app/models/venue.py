@@ -72,6 +72,60 @@ class Venue(models.Model):
         return get_category_info(self.first_category)
 
 
+class VenueModifier(models.Model):
+    AVAIL = 0
+    UNAVAIL = 1
+
+    STATUS_CHOICES = (
+        (AVAIL, 'Доступен'),
+        (UNAVAIL, 'Не доступен')
+    )
+
+    venue = models.ForeignKey(Venue)
+    modifier_binding = models.ForeignKey(ModifierBinding)
+    price = models.IntegerField(max_length=255)
+    status = models.IntegerField(max_length=255, choices=STATUS_CHOICES, default=AVAIL)
+
+    def dict(self):
+        return self.modifier_binding.dict().update({
+            'price': self.price,
+            'status': self.status
+        })
+
+
+class VenueGroupModifier(models.Model):
+    AVAIL = 0
+    UNAVAIL = 1
+
+    STATUS_CHOICES = (
+        (AVAIL, 'Доступен'),
+        (UNAVAIL, 'Не доступен')
+    )
+
+    venue = models.ForeignKey(Venue)
+    modifier_binding = models.ForeignKey(GroupModifierBinding)
+    status = models.IntegerField(max_length=255, choices=STATUS_CHOICES, default=AVAIL)
+
+    def get_items(self):
+        return [VenueGroupModifierItem.objects.filter(venue=self.venue,
+                                                      group_modifier_item__in=self.group_modifier.modifier.choices)]
+
+
+class VenueGroupModifierItem(models.Model):  # TODO: fuck this!
+    AVAIL = 0
+    UNAVAIL = 1
+
+    STATUS_CHOICES = (
+        (AVAIL, 'Доступен'),
+        (UNAVAIL, 'Не доступен')
+    )
+
+    venue = models.ForeignKey(Venue)
+    group_modifier_item = models.ForeignKey(GroupModifierItem)
+    price = models.IntegerField(max_length=255)
+    status = models.IntegerField(max_length=255, choices=STATUS_CHOICES, default=AVAIL)
+
+
 class VenueProduct(models.Model):
     AVAIL = 0
     UNAVAIL = 1
@@ -96,55 +150,11 @@ class VenueProduct(models.Model):
         self.save()
 
     def dict(self):
-        return self.product.dict().update({
+        product_dict = self.product.dict()
+        product_dict.update({
             'price': self.price,
-            'status': self.status
+            'status': self.status,
+            'single_modifiers': [modifier.dict() for modifier in
+                                 VenueModifier.objects.filter(venue=self.venue, modifier_binding__product=self.product)]
         })
-
-
-class VenueModifier(models.Model):
-    AVAIL = 0
-    UNAVAIL = 1
-
-    STATUS_CHOICES = (
-        (AVAIL, 'Доступен'),
-        (UNAVAIL, 'Не доступен')
-    )
-
-    venue = models.ForeignKey(Venue)
-    modifier_binding = models.ForeignKey(ModifierBinding)
-    price = models.IntegerField(max_length=255)
-    status = models.IntegerField(max_length=255, choices=STATUS_CHOICES, default=AVAIL)
-
-
-class VenueGroupModifier(models.Model):
-    AVAIL = 0
-    UNAVAIL = 1
-
-    STATUS_CHOICES = (
-        (AVAIL, 'Доступен'),
-        (UNAVAIL, 'Не доступен')
-    )
-
-    venue = models.ForeignKey(Venue)
-    modifier_binding = models.ForeignKey(GroupModifierBinding)
-    status = models.IntegerField(max_length=255, choices=STATUS_CHOICES, default=AVAIL)
-
-    def get_items(self):
-        return [VenueGroupModifierItem.objects.filter(venue=self.venue,
-                                                      group_modifier_item__in=self.group_modifier.modifier.choices)]
-
-
-class VenueGroupModifierItem(models.Model):
-    AVAIL = 0
-    UNAVAIL = 1
-
-    STATUS_CHOICES = (
-        (AVAIL, 'Доступен'),
-        (UNAVAIL, 'Не доступен')
-    )
-
-    venue = models.ForeignKey(Venue)
-    group_modifier_item = models.ForeignKey(GroupModifierItem)
-    price = models.IntegerField(max_length=255)
-    status = models.IntegerField(max_length=255, choices=STATUS_CHOICES, default=AVAIL)
+        return product_dict
