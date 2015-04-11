@@ -8,6 +8,7 @@ urlpatterns = patterns('',
 
     url(r'^api/menu/$', api.menu),
     url(r'^api/companies/$', api.companies),
+    url(r'^api/venues/$', api.venues),
 
     url(r'^web/login/$', web.login),
     url(r'^web/logout/$', web.logout),

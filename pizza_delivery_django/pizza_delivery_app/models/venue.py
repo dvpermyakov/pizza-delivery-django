@@ -69,6 +69,16 @@ class Venue(models.Model):
 
         return get_category_info(self.first_category)
 
+    def dict(self):
+        return {
+            'id': self.id,
+            'company_id': self.company.id,
+            'name': self.name,
+            'description': self.description,
+            'first_category_id': self.first_category.id,
+            'address': self.address.dict()
+        }
+
 
 class VenueModifier(models.Model):
     AVAIL = 0
