@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from django.contrib.auth.decorators import login_required, permission_required
+from pizza_delivery_app.methods.deviantsart import upload_image
 from pizza_delivery_app.models import Company, Category, Product
 from django.http import HttpResponseForbidden, HttpResponseBadRequest, HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import render, redirect
@@ -9,8 +10,8 @@ from pizza_delivery_app.models.menu import SingleModifier, GroupModifier, GroupM
     GroupModifierBinding
 from django.core.context_processors import csrf
 from django import forms
-from pizza_delivery_app.methods import storage_disk
 import json
+
 
 @login_required
 def menu(request, venue_id):
@@ -71,19 +72,14 @@ def save_category(form, venue):
         category.name = form.cleaned_data['name']
         category.description = form.cleaned_data['description']
         if form.cleaned_data['image']:
-            storage_disk.delete_file(venue, storage_disk.CATEGORY, category.id)
-            image_url = storage_disk.upload_venue_file(venue, storage_disk.CATEGORY, category.id,
-                                                       form.cleaned_data['image'])
-            category.image_url = image_url
+            category.image_url = upload_image(form.cleaned_data['image'])
         category.save()
     else:
         category = Category(name=form.cleaned_data['name'], description=form.cleaned_data['description'],
                             parent=Category.objects.get(id=form.cleaned_data['parent_category_id']))
         category.save()
         if form.cleaned_data['image']:
-            image_url = storage_disk.upload_venue_file(venue, storage_disk.CATEGORY, category.id,
-                                                       form.cleaned_data['image'])
-            category.image_url = image_url
+            category.image_url = upload_image(form.cleaned_data['image'])
         category.save()
 
 
@@ -195,10 +191,7 @@ def save_product(form, venue):
         product.name = form.cleaned_data['name']
         product.description = form.cleaned_data['description']
         if form.cleaned_data['image']:
-            storage_disk.delete_file(venue, storage_disk.PRODUCT, product.id)
-            image_url = storage_disk.upload_venue_file(venue, storage_disk.PRODUCT, product.id,
-                                                       form.cleaned_data['image'])
-            product.image_url = image_url
+            product.image_url = upload_image(form.cleaned_data['image'])
         product.save()
     else:
         product = Product(name=form.cleaned_data['name'], description=form.cleaned_data['description'],
@@ -206,9 +199,7 @@ def save_product(form, venue):
                           category=Category.objects.get(id=form.cleaned_data['category_id']))
         product.save()
         if form.cleaned_data['image']:
-            image_url = storage_disk.upload_venue_file(venue, storage_disk.PRODUCT, product.id,
-                                                       form.cleaned_data['image'])
-            product.image_url = image_url
+            product.image_url = upload_image(form.cleaned_data['image'])
             product.save()
         product.save_in_venues(venue)
 
@@ -397,18 +388,13 @@ def save_single_modifier(form, venue):
         modifier = SingleModifier.objects.get(id=form.cleaned_data['single_modifier_id'])
         modifier.name = form.cleaned_data['name']
         if form.cleaned_data['image']:
-            storage_disk.delete_file(venue, storage_disk.SINGLE_MODIFIER, modifier.id)
-            image_url = storage_disk.upload_venue_file(venue, storage_disk.SINGLE_MODIFIER, modifier.id,
-                                                       form.cleaned_data['image'])
-            modifier.image_url = image_url
+            modifier.image_url = upload_image(form.cleaned_data['image'])
         modifier.save()
     else:
         modifier = SingleModifier(name=form.cleaned_data['name'], min_price=form.cleaned_data['min_price'])
         modifier.save()
         if form.cleaned_data['image']:
-            image_url = storage_disk.upload_venue_file(venue, storage_disk.SINGLE_MODIFIER, modifier.id,
-                                                       form.cleaned_data['image'])
-            modifier.image_url = image_url
+            modifier.image_url = upload_image(form.cleaned_data['image'])
             modifier.save()
         modifier.save_in_venues(venue)
 
@@ -491,18 +477,13 @@ def save_group_modifier(form, venue):
         modifier = GroupModifier.objects.get(id=form.cleaned_data['group_modifier_id'])
         modifier.name = form.cleaned_data['name']
         if form.cleaned_data['image']:
-            storage_disk.delete_file(venue, storage_disk.GROUP_MODIFIER, modifier.id)
-            image_url = storage_disk.upload_venue_file(venue, storage_disk.GROUP_MODIFIER, modifier.id,
-                                                       form.cleaned_data['image'])
-            modifier.image_url = image_url
+            modifier.image_url = upload_image(form.cleaned_data['image'])
         modifier.save()
     else:
         modifier = GroupModifier(name=form.cleaned_data['name'])
         modifier.save()
         if form.cleaned_data['image']:
-            image_url = storage_disk.upload_venue_file(venue, storage_disk.GROUP_MODIFIER, modifier.id,
-                                                       form.cleaned_data['image'])
-            modifier.image_url = image_url
+            modifier.image_url = upload_image(form.cleaned_data['image'])
             modifier.save()
         modifier.save_in_venues(venue)
 
@@ -586,19 +567,14 @@ def save_group_modifier_item(form, venue):
         modifier = GroupModifierItem.objects.get(id=form.cleaned_data['group_modifier_item_id'])
         modifier.name = form.cleaned_data['name']
         if form.cleaned_data['image']:
-            storage_disk.delete_file(venue, storage_disk.GROUP_MODIFIER, modifier.id)
-            image_url = storage_disk.upload_venue_file(venue, storage_disk.GROUP_MODIFIER, modifier.id,
-                                                       form.cleaned_data['image'])
-            modifier.image_url = image_url
+            modifier.image_url = upload_image(form.cleaned_data['image'])
         modifier.save()
     else:
         modifier = GroupModifierItem(name=form.cleaned_data['name'], min_price=form.cleaned_data['min_price'])
         modifier.group_modifier = GroupModifier.objects.get(id=form.cleaned_data['group_modifier_id'])
         modifier.save()
         if form.cleaned_data['image']:
-            image_url = storage_disk.upload_venue_file(venue, storage_disk.GROUP_MODIFIER, modifier.id,
-                                                       form.cleaned_data['image'])
-            modifier.image_url = image_url
+            modifier.image_url = upload_image(form.cleaned_data['image'])
             modifier.save()
 
 

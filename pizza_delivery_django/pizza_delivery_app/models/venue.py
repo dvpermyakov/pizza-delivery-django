@@ -6,7 +6,6 @@ from menu import Category, Product, ModifierBinding, GroupModifierBinding, Group
     GroupModifier
 from collections import deque
 from company import Company
-from pizza_delivery_app.methods import storage_disk
 
 
 class Venue(models.Model):
@@ -34,7 +33,6 @@ class Venue(models.Model):
             venue = cls(company=company, address=address, name=name, description=description,
                         first_category=first_category, manager_username=manager_username)
             venue.save()
-        storage_disk.create_venue_folder(venue)
         return venue
 
     def get_products_from_menu(self, venue_product=True):

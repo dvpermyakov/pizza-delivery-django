@@ -1,7 +1,7 @@
 # coding: utf-8
 
 from django.db import models
-from pizza_delivery_app.methods import storage_disk
+from pizza_delivery_app.methods.deviantsart import upload_image
 
 
 class Company(models.Model):
@@ -12,10 +12,7 @@ class Company(models.Model):
     @classmethod
     def create(cls, company_name, user, image):
         company = cls(chief_username=user.username, name=company_name)
-        company.save()
-        storage_disk.create_company_folder(company)
-        image_url = storage_disk.upload_company_file(company, storage_disk.COMPANY, company.id, image)
-        company.image_url = image_url
+        company.image_url = upload_image(image)
         company.save()
         return company
 
@@ -32,5 +29,6 @@ class Company(models.Model):
 
     def dict(self):
         return {
-            'name': self.name
+            'name': self.name,
+            'image': self.image_url
         }
