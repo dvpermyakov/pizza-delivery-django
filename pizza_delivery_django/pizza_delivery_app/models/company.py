@@ -29,6 +29,7 @@ class Company(models.Model):
 
     def dict(self):
         return {
+            'id': self.id,
             'name': self.name,
             'image': self.image_url
         }
