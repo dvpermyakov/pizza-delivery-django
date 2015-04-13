@@ -4,8 +4,6 @@ from pizza_delivery_app.models import Venue
 
 
 def _parse_menu_category(category):
-    import logging
-    logging.error(category['products'])
     category['products'] = [product.dict() for product in category['products']]
     if not category['products']:
         del category['products']
@@ -23,7 +21,7 @@ def menu(request):
         try:
             venue = Venue.objects.get(id=venue_id)
             return JsonResponse({
-                'menu': _parse_menu_category(venue.get_menu())
+                'menu': _parse_menu_category(venue.get_menu(venue_product=False))
             })
         except Venue.DoesNotExist:
             return HttpResponseBadRequest()

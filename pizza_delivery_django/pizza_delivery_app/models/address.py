@@ -14,6 +14,7 @@ class Address(models.Model):
 
     def dict(self):
         return {
+            'id': self.id,
             'lat': self.lat,
             'lon': self.lon,
             'city': self.city,

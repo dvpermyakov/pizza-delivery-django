@@ -27,7 +27,9 @@ class Category(models.Model):
     def dict(self):
         return {
             'id': self.id,
-            'name': self.name
+            'name': self.name,
+            'description': self.description,
+            'image': self.image_url
         }
 
 
