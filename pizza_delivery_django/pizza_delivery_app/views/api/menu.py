@@ -5,12 +5,8 @@ from pizza_delivery_app.models import Venue
 
 def _parse_menu_category(category):
     category['products'] = [product.dict() for product in category['products']]
-    if not category['products']:
-        del category['products']
     category['category'] = category['category'].dict()
     category['children'] = [_parse_menu_category(child_category) for child_category in category['children']]
-    if not category['children']:
-        del category['children']
     return category
 
 
