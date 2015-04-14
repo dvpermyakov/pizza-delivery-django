@@ -1,2 +1,3 @@
 *.pyc
 .idea
+pizza_delivery_django/pizza_delivery_app/migrations/
