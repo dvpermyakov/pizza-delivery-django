@@ -2,9 +2,14 @@ from django.conf.urls import patterns, url
 from pizza_delivery_app.views import api, web
 from pizza_delivery_app.views.web import company, venue
 from pizza_delivery_app.views.first_page import first_page
+from pizza_delivery_app.views.api import user
 
 urlpatterns = patterns('',
     url(r'^$', first_page),
+
+    url(r'^api/user/create_or_update/$', user.create_or_update),
+
+    url(r'^api/address/get_home/by_coordinates/$', api.get_home_by_coordinates),
 
     url(r'^api/menu/$', api.menu),
     url(r'^api/companies/$', api.companies),

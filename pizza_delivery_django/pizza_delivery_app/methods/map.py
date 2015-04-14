@@ -50,6 +50,8 @@ def get_houses_by_coordinates(lat, lon):
     }
     url = 'http://geocode-maps.yandex.ru/1.x/'
     response = requests.get(url, params=params).json()
+    import logging
+    logging.error(response)
     collection = response['response']['GeoObjectCollection']['featureMember']
 
     return _parse_collection(collection, kind='house')
