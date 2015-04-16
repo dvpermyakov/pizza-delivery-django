@@ -9,7 +9,7 @@ urlpatterns = patterns('',
 
     url(r'^api/user/create_or_update/$', user.create_or_update),
 
-    url(r'^api/address/get_home/by_coordinates/$', api.get_home_by_coordinates),
+    url(r'^api/address/get_home/by_coordinates/$', api.get_home_by_coordinates),  # TODO: is it need?
 
     url(r'^api/menu/$', api.menu),
     url(r'^api/companies/$', api.companies),
