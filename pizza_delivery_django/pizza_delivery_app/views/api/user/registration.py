@@ -1,3 +1,4 @@
+import logging
 from django.http import JsonResponse
 from pizza_delivery_app.models.user import User
 from django.views.decorators.csrf import csrf_exempt
@@ -19,6 +20,7 @@ def create_or_update(request):
                 user.address.lon = float(lon)
                 user.address.save()
 
+    logging.error(request.POST)
     user_id = request.POST.get('user_id')
     try:
         user = User.objects.get(id=user_id)
