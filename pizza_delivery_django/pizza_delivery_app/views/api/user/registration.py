@@ -1,5 +1,6 @@
 import logging
 from django.http import JsonResponse
+from pizza_delivery_app.models import Address
 from pizza_delivery_app.models.user import User
 from django.views.decorators.csrf import csrf_exempt
 from pizza_delivery_app.methods import map
@@ -13,12 +14,18 @@ def create_or_update(request):
         if candidates:
             address = candidates[0].get('address')
             if address:
-                user.address.city = address.get('city')
-                user.address.street = address.get('street')
-                user.address.home = address.get('home')
-                user.address.lat = float(lat)
-                user.address.lon = float(lon)
-                user.address.save()
+                logging.error("It should be changed")
+                if not user.address:
+                    address_obj = Address()
+                else:
+                    address_obj = user.address
+                address_obj.city = address.get('city')
+                address_obj.street = address.get('street')
+                address_obj.home = address.get('home')
+                address_obj.lat = float(lat)
+                address_obj.lon = float(lon)
+                address_obj.save()
+                user.address = address_obj
 
     logging.error(request.POST)
     user_id = request.POST.get('user_id')
@@ -35,4 +42,6 @@ def create_or_update(request):
     lon = request.POST.get('lon')
     save_address(user, map.get_houses_by_coordinates(lat, lon))
     user.save()
+    if user.address:
+        logging.error(user.address.id)
     return JsonResponse(user.dict())
