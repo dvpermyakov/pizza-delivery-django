@@ -24,7 +24,7 @@ def create_or_update(request):
     user_id = request.POST.get('user_id')
     try:
         user = User.objects.get(id=user_id)
-    except User.DoesNotExist:
+    except:
         user = None
     name = request.POST.get('name')
     if user:
