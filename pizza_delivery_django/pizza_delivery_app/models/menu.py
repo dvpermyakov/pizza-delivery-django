@@ -59,7 +59,8 @@ class Product(models.Model):
             'id': self.id,
             'name': self.name,
             'description': self.description,
-            'image_url': self.image_url
+            'image_url': self.image_url,
+            'venue_products': [venue_product.dict(product_include=False) for venue_product in self.venue_product.all()]
         }
 
 

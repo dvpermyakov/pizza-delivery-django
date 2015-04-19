@@ -157,12 +157,15 @@ class VenueProduct(models.Model):
         self.price += change
         self.save()
 
-    def dict(self):
-        product_dict = self.product.dict()
-        product_dict.update({
+    def dict(self, product_include=True):
+        product_dict = {
+            'id': self.id,
+            'venue_id': self.venue.id,
             'price': self.price,
             'status': self.status,
-            'single_modifiers': [modifier.dict() for modifier in
-                                 VenueModifier.objects.filter(venue=self.venue, modifier_binding__product=self.product)]
-        })
+            #'single_modifiers': [modifier.dict() for modifier in
+            #                     VenueModifier.objects.filter(venue=self.venue, modifier_binding__product=self.product)]
+        }
+        if product_include:
+            product_dict = self.product.dict()
         return product_dict
