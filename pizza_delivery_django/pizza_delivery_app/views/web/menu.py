@@ -266,7 +266,7 @@ def change_product(request, venue_id, product_id):
             form.hide_min_price()
             return general_render(form)
         elif request.method == 'POST':
-            form = ProductForm(request.POST)
+            form = ProductForm(request.POST, request.FILES)
             form.hide_min_price()
             if form.is_valid():
                 save_product(form, venue)
