@@ -81,6 +81,12 @@ class Venue(models.Model):
             'address': self.address.dict()
         }
 
+    def updated_dict(self):
+        return {
+            'id': self.id,
+            'last_updated': timestamp(self.updated)
+        }
+
 
 class VenueModifier(models.Model):
     AVAIL = 0
@@ -166,8 +172,7 @@ class VenueProduct(models.Model):
             'venue_product_id': self.id,
             'venue_id': self.venue.id,
             'price': self.price,
-            'status': self.status,
-            'last_updated': timestamp(self.venue.updated)
+            'status': self.status
         }
         if product_include:
             product_dict = self.product.dict()

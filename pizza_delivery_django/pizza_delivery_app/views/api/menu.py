@@ -25,7 +25,9 @@ def menu(request):
             else:
                 venue_only = None
             return JsonResponse({
-                'menu': _parse_menu_category(venue.get_menu(venue_product=False), venue_only)
+                'menu': _parse_menu_category(venue.get_menu(venue_product=False), venue_only),
+                'venues_updated': [venue.updated_dict() for venue in venue.first_category.get_venues()] if not for_venue_only
+                else [venue.updated_dict()]
             })
         except Venue.DoesNotExist:
             return HttpResponseBadRequest()

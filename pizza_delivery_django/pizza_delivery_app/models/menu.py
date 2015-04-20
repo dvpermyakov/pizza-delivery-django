@@ -33,7 +33,7 @@ class Category(models.Model):
             'name': self.name,
             'description': self.description,
             'image': self.image_url,
-            'last_updated': timestamp(self.updated)
+            'last_updated': timestamp(self.updated) if self.parent == None else None
         }
 
 
