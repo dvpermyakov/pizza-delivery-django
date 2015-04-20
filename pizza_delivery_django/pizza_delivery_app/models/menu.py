@@ -1,3 +1,5 @@
+import logging
+from pizza_delivery_app.methods.times import timestamp
 from django.db import models
 
 
@@ -6,6 +8,7 @@ class Category(models.Model):
     parent = models.ForeignKey('self', related_name='child', null=True)
     description = models.CharField(max_length=255)
     image_url = models.URLField(max_length=1000, null=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def get_first_category(self):
         category = self
@@ -29,7 +32,8 @@ class Category(models.Model):
             'id': self.id,
             'name': self.name,
             'description': self.description,
-            'image': self.image_url
+            'image': self.image_url,
+            'last_updated': timestamp(self.updated)
         }
 
 
@@ -54,13 +58,15 @@ class Product(models.Model):
         VenueProduct.objects.filter(product=self).delete()
         self.delete()
 
-    def dict(self):
+    def dict(self, venue=None):
+        from venue import VenueProduct
         return {
             'id': self.id,
             'name': self.name,
             'description': self.description,
             'image_url': self.image_url,
             'venue_products': [venue_product.dict(product_include=False) for venue_product in self.venue_product.all()]
+            if not venue else [VenueProduct.objects.get(venue=venue, product=self).dict(product_include=False)]
         }
 
 

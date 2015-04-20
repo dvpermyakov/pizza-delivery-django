@@ -81,6 +81,7 @@ def save_category(form, venue):
         if form.cleaned_data['image']:
             category.image_url = upload_image(form.cleaned_data['image'])
         category.save()
+    category.get_first_category().save()
 
 
 @login_required
@@ -163,6 +164,7 @@ def delete_category(request, venue_id):
         if request.method == 'POST':
             category_id = request.POST.get('category_id')
             category = Category.objects.get(id=category_id)
+            category.get_first_category().save()
             category.delete_category()
             return HttpResponse(json.dumps({
                 'category_id': category_id
@@ -202,6 +204,7 @@ def save_product(form, venue):
             product.image_url = upload_image(form.cleaned_data['image'])
             product.save()
         product.save_in_venues(venue)
+    product.category.get_first_category().save()
 
 
 @login_required
@@ -289,6 +292,7 @@ def delete_product(request, venue_id):
         if request.method == 'POST':
             product_id = request.POST.get('product_id')
             product = Product.objects.get(id=product_id)
+            product.category.get_first_category().save()
             product.full_delete()
             return HttpResponse(json.dumps({
                 'product_id': product_id

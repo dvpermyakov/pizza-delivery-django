@@ -6,6 +6,7 @@ from menu import Category, Product, ModifierBinding, GroupModifierBinding, Group
     GroupModifier
 from collections import deque
 from company import Company
+from pizza_delivery_app.methods.times import timestamp
 
 
 class Venue(models.Model):
@@ -18,6 +19,7 @@ class Venue(models.Model):
     first_rib = models.ForeignKey(GeoRib, null=True)
     single_modifiers = models.ManyToManyField(SingleModifier)
     group_modifiers = models.ManyToManyField(GroupModifier)
+    updated = models.DateTimeField(auto_now=True)
 
     @classmethod
     def create(cls, company, address, name, description, manager_username, first_category=None):
@@ -152,19 +154,20 @@ class VenueProduct(models.Model):
         self.status += 1
         self.status %= 2
         self.save()
+        self.venue.save()
 
     def change_price(self, change):
         self.price += change
         self.save()
+        self.venue.save()
 
     def dict(self, product_include=True):
         product_dict = {
-            'id': self.id,
+            'venue_product_id': self.id,
             'venue_id': self.venue.id,
             'price': self.price,
             'status': self.status,
-            #'single_modifiers': [modifier.dict() for modifier in
-            #                     VenueModifier.objects.filter(venue=self.venue, modifier_binding__product=self.product)]
+            'last_updated': timestamp(self.venue.updated)
         }
         if product_include:
             product_dict = self.product.dict()
