@@ -7,8 +7,9 @@ from pizza_delivery_app.views.api import user
 urlpatterns = patterns('',
     url(r'^$', first_page),
 
-    url(r'^api/yandex_money/auth/$', api.auth),
-    url(r'^api/user/card/success', api.get_token),
+    url(r'^api/yandex_money/auth/$', user.auth),
+    url(r'^api/yandex_money/get_balance/$', user.get_balance),
+    url(r'^api/user/card/success', user.set_token),  # callback after filling data in yd
 
     url(r'^api/user/create_or_update/$', user.create_or_update),
 

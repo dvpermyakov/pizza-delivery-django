@@ -13,6 +13,7 @@ def _parse_menu_category(category, venue=None):
 
 
 def menu(request):
+    logging.error(request)
     venue_id = request.GET.get('venue_id')
     for_venue_only = 'venue_only' in request.GET
     logging.error(for_venue_only)
