@@ -43,11 +43,11 @@
 
             $('.price_up').click(function(e){
                 e.preventDefault();
-                add_to_price(parseInt($('#change_in_price').val()), this.id);
+                add_to_price(parseInt($('#change_in_price_' + this.id).val()), this.id);
             });
             $('.price_down').click(function(e){
                 e.preventDefault();
-                add_to_price(parseInt($('#change_in_price').val()) * -1, this.id);
+                add_to_price(parseInt($('#change_in_price_' + this.id).val()) * -1, this.id);
             });
 
             $('.category_delete_btn').click(function(e){
@@ -176,7 +176,7 @@
                     <td>
                         <form>
                             {% csrf_token %}
-                            <label>Введите число<input type="number" id="change_in_price"></label>
+                            <label>Введите число<input type="number" id="change_in_price_{{ product.id }}"></label>
                             <input class="price_up" type="button" value="+" id={{ product.id }}>
                             <input class="price_down" type="button" value="-" id={{ product.id }}>
                         </form>
