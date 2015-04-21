@@ -1,5 +1,6 @@
 import logging
 import requests
+import json
 
 __author__ = 'dvpermyakov'
 
@@ -29,4 +30,4 @@ def get_token(code):
         "grant_type": "authorization_code",
         "code": code
     }
-    return requests.post(url, params=params).json()
+    return json.loads(requests.post(url, params=params).json())

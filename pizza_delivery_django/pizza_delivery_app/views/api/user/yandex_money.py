@@ -1,5 +1,5 @@
 # coding: utf-8
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
 from pizza_delivery_app.models import User
 
 __author__ = 'dvpermyakov'
@@ -12,10 +12,7 @@ def auth(request):
     try:
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
-        return JsonResponse({
-            "success": False,
-            "description": u"Незарегестрированный пользователь"
-        })
+        return HttpResponseBadRequest()
     return HttpResponse(authorize(user.id))
 
 
