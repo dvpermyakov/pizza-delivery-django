@@ -1,4 +1,5 @@
 # coding: utf-8
+import logging
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
 from pizza_delivery_app.models import User
 
@@ -23,6 +24,8 @@ def get_token(request):
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         return HttpResponse()
-    user.yd_token = get_token(code)["access_token"]
+    response = get_token(code)
+    logging.error(response)
+    user.yd_token = response["access_token"]
     user.save()
     return HttpResponse()
