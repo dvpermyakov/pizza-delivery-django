@@ -7,7 +7,6 @@ __author__ = 'dvpermyakov'
 class User(models.Model):
     name = models.CharField(max_length=255)
     address = models.ForeignKey(Address, null=True)
-    yd_token = models.CharField(max_length=2000, null=True)
 
     def dict(self):
         return {
@@ -15,3 +14,9 @@ class User(models.Model):
             'address': self.address.dict() if self.address else None,
             'name': self.name
         }
+
+
+class YdWallet(models.Model):
+    user = models.ForeignKey(User, related_name='yd_wallet')
+    token = models.CharField(max_length=2000)
+    number = models.CharField(max_length=2000, null=True)

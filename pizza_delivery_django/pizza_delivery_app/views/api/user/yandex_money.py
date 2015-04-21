@@ -2,6 +2,7 @@
 import logging
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from pizza_delivery_app.models import User
+from pizza_delivery_app.models.user import YdWallet
 
 __author__ = 'dvpermyakov'
 
@@ -25,8 +26,9 @@ def set_token(request):
     except User.DoesNotExist:
         return HttpResponse()
 
-    user.yd_token = get_token(code)['access_token']
-    user.save()
+    token = get_token(code)['access_token']
+    number = account_info(token)['account']
+    YdWallet(user=user, token=token, number=number).save()
     return HttpResponse('Успешно!')
 
 
@@ -36,8 +38,14 @@ def get_balance(request):
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         return HttpResponseBadRequest()
-    response = account_info(user.yd_token)
+    wallets = YdWallet.objects.filter(user=user)
+    result = []
+    for wallet in wallets:
+        response = account_info(wallet.token)
+        result.append({
+            'account': response['account'],
+            'balance': response['balance']
+        })
     return JsonResponse({
-        'account': response['account'],
-        'balance': response['balance']
+        'info':result
     })
