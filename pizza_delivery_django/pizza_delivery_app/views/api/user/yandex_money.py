@@ -1,12 +1,13 @@
 # coding: utf-8
 import logging
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
-from pizza_delivery_app.models import User
+from pizza_delivery_app.models import User, Company
+from pizza_delivery_app.models.order import Order
 from pizza_delivery_app.models.user import YdWallet
 
 __author__ = 'dvpermyakov'
 
-from pizza_delivery_app.methods.yandex_money import authorize, get_token, account_info
+from pizza_delivery_app.methods.yandex_money import authorize, get_token, account_info, request_payment
 
 
 def auth(request):
@@ -49,3 +50,12 @@ def get_balance(request):
     return JsonResponse({
         'info':result
     })
+
+
+def pay_yd(request):
+    user = User.objects.get(id=20)
+    company = Company.objects.get(id=1)
+    order = Order()
+    order.id = 2
+    response = request_payment(user.token, order, company)
+    return JsonResponse(response)

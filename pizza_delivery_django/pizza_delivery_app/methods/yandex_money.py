@@ -1,6 +1,6 @@
+# coding: utf-8
 import logging
 import requests
-import json
 
 __author__ = 'dvpermyakov'
 
@@ -48,6 +48,22 @@ def get_token(code):
 
 def account_info(token):
     url = BASE_URL + "/api/account-info"
+    headers = {
+        'Authorization': 'Bearer %s' % token
+    }
+    return requests.post(url, headers=headers).json()
+
+
+def request_payment(token, company, order):
+    url = BASE_URL + "/api/account-info"
+    params = {
+        "pattern_id": "p2p",
+        "to": company.yd_wallet_number,
+        "amount": order.sum,
+        "comment": u"Платеж копании %s за заказ №%s" % (company.name, order.id),
+        "message": u"Платеж копании %s за заказ №%s" % (company.name, order.id),
+        "label": order.id
+    }
     headers = {
         'Authorization': 'Bearer %s' % token
     }

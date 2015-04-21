@@ -15,6 +15,8 @@ urlpatterns = patterns('',
 
     url(r'^api/address/get_home/by_coordinates/$', api.get_home_by_coordinates),
 
+    url(r'^api/order', user.pay_yd),
+
     url(r'^api/menu/$', api.menu),
     url(r'^api/menu/last_modified/$', api.last_modified_menu),
     url(r'^api/companies/$', api.companies),

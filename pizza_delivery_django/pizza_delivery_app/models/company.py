@@ -8,6 +8,7 @@ class Company(models.Model):
     name = models.CharField(max_length=255, unique=True)
     chief_username = models.CharField(max_length=255)
     image_url = models.URLField(max_length=1000, null=True)
+    yd_wallet_number = models.CharField(max_length=2000, default="410011747996479")
 
     @classmethod
     def create(cls, company_name, user, image):
