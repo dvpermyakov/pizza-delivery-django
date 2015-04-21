@@ -7,6 +7,9 @@ from pizza_delivery_app.views.api import user
 urlpatterns = patterns('',
     url(r'^$', first_page),
 
+    url(r'^api/yandex_money/auth/$', api.auth),
+    url(r'^api/user/card/success', api.get_token),
+
     url(r'^api/user/create_or_update/$', user.create_or_update),
 
     url(r'^api/address/get_home/by_coordinates/$', api.get_home_by_coordinates),
