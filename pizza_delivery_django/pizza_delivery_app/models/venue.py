@@ -99,8 +99,8 @@ class VenueModifier(models.Model):
 
     venue = models.ForeignKey(Venue)
     modifier_binding = models.ForeignKey(ModifierBinding)
-    price = models.IntegerField(max_length=255)
-    status = models.IntegerField(max_length=255, choices=STATUS_CHOICES, default=AVAIL)
+    price = models.IntegerField()
+    status = models.IntegerField(choices=STATUS_CHOICES, default=AVAIL)
 
     def dict(self):
         return self.modifier_binding.dict().update({
@@ -120,7 +120,7 @@ class VenueGroupModifier(models.Model):
 
     venue = models.ForeignKey(Venue)
     modifier_binding = models.ForeignKey(GroupModifierBinding)
-    status = models.IntegerField(max_length=255, choices=STATUS_CHOICES, default=AVAIL)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=AVAIL)
 
     def get_items(self):
         return [VenueGroupModifierItem.objects.filter(venue=self.venue,
@@ -138,8 +138,8 @@ class VenueGroupModifierItem(models.Model):  # TODO: fuck this!
 
     venue = models.ForeignKey(Venue)
     group_modifier_item = models.ForeignKey(GroupModifierItem)
-    price = models.IntegerField(max_length=255)
-    status = models.IntegerField(max_length=255, choices=STATUS_CHOICES, default=AVAIL)
+    price = models.IntegerField()
+    status = models.IntegerField(choices=STATUS_CHOICES, default=AVAIL)
 
 
 class VenueProduct(models.Model):
@@ -153,8 +153,8 @@ class VenueProduct(models.Model):
 
     venue = models.ForeignKey(Venue)
     product = models.ForeignKey(Product, related_name='venue_product')
-    price = models.IntegerField(max_length=255)
-    status = models.IntegerField(max_length=255, choices=STATUS_CHOICES, default=AVAIL)
+    price = models.IntegerField()
+    status = models.IntegerField(choices=STATUS_CHOICES, default=AVAIL)
 
     def change_status(self):
         self.status += 1

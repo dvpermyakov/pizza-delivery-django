@@ -39,7 +39,7 @@ class Category(models.Model):
 
 class Product(models.Model):
     category = models.ForeignKey(Category, related_name='product_category')
-    min_price = models.IntegerField(max_length=255)
+    min_price = models.IntegerField()
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
     image_url = models.URLField(max_length=1000, null=True)
@@ -72,7 +72,7 @@ class Product(models.Model):
 
 class SingleModifier(models.Model):
     name = models.CharField(max_length=255)
-    min_price = models.IntegerField(max_length=255, default=0)
+    min_price = models.IntegerField(default=0)
     image_url = models.URLField(max_length=1000, null=True)
 
     def save_in_venues(self, creator_venue):
@@ -102,7 +102,7 @@ class GroupModifier(models.Model):
 
 class GroupModifierItem(models.Model):
     name = models.CharField(max_length=255)
-    min_price = models.IntegerField(max_length=255, default=0)
+    min_price = models.IntegerField(default=0)
     image_url = models.URLField(max_length=1000, null=True)
     group_modifier = models.ForeignKey(GroupModifier, related_name='group_modifier_item')
 
