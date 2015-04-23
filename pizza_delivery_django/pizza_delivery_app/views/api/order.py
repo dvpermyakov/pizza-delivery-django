@@ -25,11 +25,8 @@ def order(request):
 
 def check_order(request):
     logging.error(request.POST)
-    try:
-        products = json.loads(request.POST.get('products'))
-    except ValueError:
-        return HttpResponseBadRequest()
-    success, _dict = validate_products(products)
+    order = request.POST.get('order')
+    success, _dict = validate_order(order)
     if not success:
         return JsonResponse({
             'success': success,

@@ -10,17 +10,7 @@ def error(description):
     }
 
 
-def validate_order(order):
-    if order.get('products'):
-        success, _dict = validate_products(order['products'])
-        if not success:
-            return success, _dict
-        return success, _dict
-    else:
-        return error(u'Неверный формат заказа')
-
-
-def validate_products(products):
+def _validate_products(products):
     if not products:
         return error(u'Неверный формат списка продуктов')
     total_sum = 0
@@ -33,3 +23,13 @@ def validate_products(products):
         return True, {
             'total_sum': total_sum
         }
+
+
+def validate_order(order):
+    if order.get('products'):
+        success, _dict = _validate_products(order['products'])
+        if not success:
+            return success, _dict
+        return success, _dict
+    else:
+        return error(u'Неверный формат заказа')
