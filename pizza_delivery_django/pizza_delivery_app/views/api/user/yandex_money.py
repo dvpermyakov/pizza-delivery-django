@@ -52,7 +52,7 @@ def get_balance(request):
     })
 
 
-def pay_yd(request):
+def pay_yd(request):  # TODO: set it example in order
     user = User.objects.get(id=20)
     company = Company.objects.get(id=1)
     order = Order()
