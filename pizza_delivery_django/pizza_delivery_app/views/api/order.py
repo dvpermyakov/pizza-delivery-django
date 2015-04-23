@@ -1,5 +1,6 @@
 import logging
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
+import json
 
 __author__ = 'dvpermyakov'
 
@@ -23,8 +24,11 @@ def order(request):
 
 
 def check_order(request):
-    logging.error(request.GET)
-    products = request.GET.get('products')
+    logging.error(request.POST)
+    try:
+        products = json.loads(request.POST.get('products'))
+    except ValueError:
+        return HttpResponseBadRequest()
     success, _dict = validate_products(products)
     if not success:
         return JsonResponse({
