@@ -5,7 +5,7 @@ __author__ = 'dvpermyakov'
 
 
 class User(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, null=True)
     address = models.ForeignKey(Address, null=True)
 
     def dict(self):

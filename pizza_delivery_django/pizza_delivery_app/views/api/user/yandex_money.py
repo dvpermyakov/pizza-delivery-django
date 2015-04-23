@@ -7,7 +7,7 @@ from pizza_delivery_app.models.user import YdWallet
 
 __author__ = 'dvpermyakov'
 
-from pizza_delivery_app.methods.yandex_money import authorize, get_token, account_info, request_payment
+from pizza_delivery_app.methods.yandex_money import authorize, get_token, account_info, request_payment, process_payment
 
 
 def auth(request):
@@ -48,7 +48,7 @@ def get_balance(request):
             'balance': response['balance']
         })
     return JsonResponse({
-        'info':result
+        'info': result
     })
 
 
@@ -57,5 +57,9 @@ def pay_yd(request):
     company = Company.objects.get(id=1)
     order = Order()
     order.id = 2
-    response = request_payment(user.token, order, company)
+    order.sum = 1
+    company.yd_wallet_number = 410011888634153
+    token = YdWallet.objects.all()[0].token
+    response = request_payment(token, order, company)
+    response = process_payment(response['request_id'], token)
     return JsonResponse(response)

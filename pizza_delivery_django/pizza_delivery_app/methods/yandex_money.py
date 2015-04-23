@@ -6,7 +6,7 @@ __author__ = 'dvpermyakov'
 
 API_KEY = "DE22D347E583338B9618CF5D8770628F0CB7C7309A14CC9528CC4A6BF4940890"
 AUTH_BASE_URL = "http://sp-money.yandex.ru"
-BASE_URL = "http://money.yandex.ru"
+BASE_URL = "https://money.yandex.ru"
 
 SCOPES = [
     'account-info',
@@ -54,17 +54,33 @@ def account_info(token):
     return requests.post(url, headers=headers).json()
 
 
-def request_payment(token, company, order):
-    url = BASE_URL + "/api/account-info"
+def request_payment(token, order, company):
+    url = BASE_URL + "/api/request-payment"
     params = {
         "pattern_id": "p2p",
         "to": company.yd_wallet_number,
         "amount": order.sum,
-        "comment": u"Платеж копании %s за заказ №%s" % (company.name, order.id),
+        "comment": u"Платеж к опании %s за заказ №%s" % (company.name, order.id),
         "message": u"Платеж копании %s за заказ №%s" % (company.name, order.id),
         "label": order.id
     }
     headers = {
-        'Authorization': 'Bearer %s' % token
+        'Authorization': 'Bearer %s' % token,
+        'Content-Type': 'application/x-www-form-urlencoded'
     }
-    return requests.post(url, headers=headers).json()
+    response = requests.post(url, headers=headers, data=params)
+    return response.json()
+
+
+def process_payment(request_id, token):
+    url = BASE_URL + "/api/process-payment"
+    params = {
+        "request_id": request_id,
+        "money_source": "wallet",
+    }
+    headers = {
+        'Authorization': 'Bearer %s' % token,
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    response = requests.post(url, headers=headers, data=params)
+    return response.json()
