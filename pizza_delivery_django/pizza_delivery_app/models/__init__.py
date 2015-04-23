@@ -3,3 +3,4 @@ from venue import Venue, VenueGroupModifier, VenueGroupModifierItem, VenueModifi
 from address import Address, GeoPoint, GeoRib
 from company import Company
 from user import User
+from order import OrderProduct, Order
