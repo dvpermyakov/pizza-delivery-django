@@ -1,6 +1,7 @@
 # coding:utf-8
 import logging
-from pizza_delivery_app.models import VenueProduct, User
+from pizza_delivery_app.models import VenueProduct, User, YdWallet
+from pizza_delivery_app.models.user import PAYMENT_TYPES, YANDEX_MONEY
 
 __author__ = 'dvpermyakov'
 
@@ -39,6 +40,22 @@ def _validate_products(products):
 
 def validate_order(order):
     result = {}
+    if order.get('payment_type'):
+        payment_type = order['payment_type']
+        if payment_type.get('type') is not None:
+            _type = payment_type['type']
+            if _type not in PAYMENT_TYPES:
+                return error(u'Недоступный способ оплаты')
+            if _type == YANDEX_MONEY:
+                try:
+                    wallet = YdWallet.objects.get(number=payment_type.get('number'))
+                    result.update({
+                        'wallet': wallet
+                    })
+                except YdWallet.DoesNotExist:
+                    return error(u'Кошелек не найден')
+        else:
+            return error(u'Необходимо выбрать способ оплаты')
     if order.get('user'):
         user = order['user']
         try:

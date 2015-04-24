@@ -11,6 +11,8 @@ class Order(models.Model):
     venue = models.ForeignKey(Venue)
     user = models.ForeignKey(User)
     total_sum = models.IntegerField()
+    payment_type = models.IntegerField()
+    payment_id = models.CharField(max_length=2000)
 
     def dict(self):
         return {

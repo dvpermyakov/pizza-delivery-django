@@ -12,6 +12,7 @@ urlpatterns = patterns('',
     url(r'^api/user/card/success', user.set_token),  # callback after filling data in yd
 
     url(r'^api/user/create_or_update/$', user.create_or_update),
+    url(r'^api/user/payments/avail', user.available_payment_types),
 
     url(r'^api/address/get_home/by_coordinates/$', api.get_home_by_coordinates),
 

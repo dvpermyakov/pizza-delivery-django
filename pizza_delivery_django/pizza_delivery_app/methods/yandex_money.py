@@ -59,7 +59,7 @@ def request_payment(token, order, company):
     params = {
         "pattern_id": "p2p",
         "to": company.yd_wallet_number,
-        "amount": order.sum,
+        "amount": order.total_sum,
         "comment": u"Платеж к опании %s за заказ №%s" % (company.name, order.id),
         "message": u"Платеж копании %s за заказ №%s" % (company.name, order.id),
         "label": order.id

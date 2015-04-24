@@ -3,6 +3,12 @@ from pizza_delivery_app.models import Address
 
 __author__ = 'dvpermyakov'
 
+YANDEX_MONEY = 0
+
+PAYMENT_TYPES = [
+    YANDEX_MONEY
+]
+
 
 class User(models.Model):
     name = models.CharField(max_length=255, null=True)
@@ -20,3 +26,8 @@ class YdWallet(models.Model):
     user = models.ForeignKey(User, related_name='yd_wallet')
     token = models.CharField(max_length=2000)
     number = models.CharField(max_length=2000, null=True)
+
+    def dict(self):
+        return {
+            'number': self.number
+        }
