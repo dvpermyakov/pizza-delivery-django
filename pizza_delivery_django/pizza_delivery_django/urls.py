@@ -13,6 +13,7 @@ urlpatterns = patterns('',
 
     url(r'^api/user/create_or_update/$', user.create_or_update),
     url(r'^api/user/payments/avail', user.available_payment_types),
+    url(r'^api/user/history', user.order_history),
 
     url(r'^api/address/get_home/by_coordinates/$', api.get_home_by_coordinates),
 
@@ -34,6 +35,7 @@ urlpatterns = patterns('',
     url(r'^web/venue/signup/$', venue.signup),
     url(r'^web/venue/map/$', venue.map_venues),
     url(r'^web/(?P<venue_id>\d+)/venue/main/$', venue.main_page),
+    url(r'^web/venue/orders/confirm', venue.confirm_order),
 
     url(r'^web/(?P<venue_id>\d+)/menu/$', web.menu),
     url(r'^web/(?P<venue_id>\d+)/menu/(?P<category_id>\d+)/category/$', web.category),
