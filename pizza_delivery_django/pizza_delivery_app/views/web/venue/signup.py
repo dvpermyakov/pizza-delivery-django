@@ -92,8 +92,11 @@ def signup(request):
             home = form.cleaned_data['home']
 
             address = Address(city=city, street=street, home=home, lat=lat, lon=lon)
-
             response = get_timezone(address)
+            if response.get('status') == "OK":
+                address.timezone_offset = response.get('rawOffset')
+                address.timezone_id = response.get('timeZoneId')
+                address.timezone_name = response.get('timeZoneName')
 
             address.save()
 

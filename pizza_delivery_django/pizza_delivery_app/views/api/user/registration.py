@@ -4,6 +4,7 @@ from pizza_delivery_app.models import Address
 from pizza_delivery_app.models.user import User
 from django.views.decorators.csrf import csrf_exempt
 from pizza_delivery_app.methods import map
+from pizza_delivery_app.methods.google_api import get_timezone
 
 __author__ = 'dvpermyakov'
 
@@ -14,7 +15,6 @@ def create_or_update(request):
         if candidates:
             address = candidates[0].get('address')
             if address:
-                logging.error("It should be changed")
                 if not user.address:
                     address_obj = Address()
                 else:
@@ -24,6 +24,11 @@ def create_or_update(request):
                 address_obj.home = address.get('home')
                 address_obj.lat = float(lat)
                 address_obj.lon = float(lon)
+                timezone_response = get_timezone(address_obj)
+                if timezone_response.get('status') == "OK":
+                    address_obj.timezone_offset = timezone_response.get('rawOffset')
+                    address_obj.timezone_id = timezone_response.get('timeZoneId')
+                    address_obj.timezone_name = timezone_response.get('timeZoneName')
                 address_obj.save()
                 user.address = address_obj
 

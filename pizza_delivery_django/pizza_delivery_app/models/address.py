@@ -5,6 +5,10 @@ class Address(models.Model):
     lat = models.FloatField(max_length=255)
     lon = models.FloatField(max_length=255)
 
+    timezone_offset = models.IntegerField(null=True)
+    timezone_id = models.CharField(max_length=255, null=True)
+    timezone_name = models.CharField(max_length=255, null=True)
+
     city = models.CharField(max_length=255)
     street = models.CharField(max_length=255)
     home = models.CharField(max_length=255)

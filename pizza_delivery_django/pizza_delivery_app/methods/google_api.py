@@ -1,6 +1,5 @@
-import logging
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime
 
 __author__ = 'dvpermyakov'
 
@@ -17,6 +16,5 @@ def get_timezone(address):
     headers = {
         'Content-Type': 'application/json',
     }
-    response = requests.get(url, params=params, headers=headers).text
-    logging.error(response)
+    response = requests.get(url, params=params, headers=headers).json()
     return response
