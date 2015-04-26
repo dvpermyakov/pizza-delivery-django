@@ -15,6 +15,7 @@ from pizza_delivery_app.models.company import Company
 from pizza_delivery_app.permissions.groups import MANAGER_GROUP, MENU_READ_PERMISSIONS
 from pizza_delivery_app.permissions.methods import add_group, add_permissions
 from django.contrib.auth.decorators import login_required, permission_required
+from pizza_delivery_app.methods.google_api import get_timezone
 
 
 class VenueSignUpForm(SignUpForm):
@@ -91,6 +92,9 @@ def signup(request):
             home = form.cleaned_data['home']
 
             address = Address(city=city, street=street, home=home, lat=lat, lon=lon)
+
+            response = get_timezone(address)
+
             address.save()
 
             manager = User.objects.create_user(login, email, password)

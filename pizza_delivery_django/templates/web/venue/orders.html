@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Заказы</title>
+</head>
+<body>
+    <table>
+        <tr>
+            <th>Номер заказа</th>
+            <th>Имя клиента</th>
+            <th>Адрес клиента</th>
+            <th>Статус</th>
+        </tr>
+        {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.client }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
