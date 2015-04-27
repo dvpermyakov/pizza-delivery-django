@@ -3,9 +3,11 @@ from pizza_delivery_app.models import Address
 
 __author__ = 'dvpermyakov'
 
+CASH = -1
 YANDEX_MONEY = 0
 
 PAYMENT_TYPES = [
+    CASH,
     YANDEX_MONEY
 ]
 

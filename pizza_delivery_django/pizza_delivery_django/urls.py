@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 from pizza_delivery_app.views import api, web
-from pizza_delivery_app.views.web import company, venue
+from pizza_delivery_app.views.web import company, venue, kitchen
 from pizza_delivery_app.views.first_page import first_page
 from pizza_delivery_app.views.api import user
 
@@ -29,13 +29,19 @@ urlpatterns = patterns('',
     url(r'^web/logout/$', web.logout),
     url(r'^web/main/$', web.main_page),
 
+    url(r'^web/kitchen/signup/$', kitchen.signup),
+    url(r'^web/kitchen/products/list/$', kitchen.cooking_list),
+    url(r'^web/kitchen/products/cook/$', kitchen.cooking_list),
+
     url(r'^web/company/signup/$', company.signup),
     url(r'^web/company/main/$', company.main_page),
 
     url(r'^web/venue/signup/$', venue.signup),
     url(r'^web/venue/map/$', venue.map_venues),
     url(r'^web/(?P<venue_id>\d+)/venue/main/$', venue.main_page),
-    url(r'^web/venue/orders/confirm', venue.confirm_order),
+    url(r'^web/venue/orders/confirm/$', venue.confirm_order),
+    url(r'^web/venue/orders/list/$', venue.order_list),
+    url(r'^web/venue/cooks/list/$', venue.cooks_list),
 
     url(r'^web/(?P<venue_id>\d+)/menu/$', web.menu),
     url(r'^web/(?P<venue_id>\d+)/menu/(?P<category_id>\d+)/category/$', web.category),

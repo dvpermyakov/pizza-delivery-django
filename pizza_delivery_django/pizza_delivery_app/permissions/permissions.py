@@ -1,5 +1,5 @@
 from django.contrib.auth.models import Permission
-from pizza_delivery_app.models import Category, Product
+from pizza_delivery_app.models import Category, Product, OrderProduct
 from pizza_delivery_app.models.venue import Venue
 from pizza_delivery_app.models.menu import SingleModifier, GroupModifier
 from django.contrib.contenttypes.models import ContentType
@@ -9,6 +9,7 @@ product_ct = ContentType.objects.get_for_model(Product)
 single_modifier_ct = ContentType.objects.get_for_model(SingleModifier)
 group_modifier_ct = ContentType.objects.get_for_model(GroupModifier)
 venue_ct = ContentType.objects.get_for_model(Venue)
+order_product_ct = ContentType.objects.get_for_model(OrderProduct)
 
 MENU_READ_PERMISSIONS = [
     Permission.objects.get_or_create(codename='read_categories', name='Can read categories', content_type=category_ct)[0],
@@ -42,4 +43,8 @@ MENU_CHANGE_PERMISSIONS = [
 
 VENUE_CRUD_PERMISSIONS = [
     Permission.objects.get_or_create(codename='crud_venues', name='Can crud venue', content_type=venue_ct)[0],
+]
+
+COOK_PERMISSIONS = [
+    Permission.objects.get_or_create(codename='cook', name='Can cook products', content_type=order_product_ct)[0],
 ]

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Кухня</title>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.cook_btn').click(function(e){
+                e.preventDefault();
+
+                $.ajax({
+                    type: "POST",
+                    url: "{{ '/web/venue/orders/confirm/' }}",
+                    data: {
+                        order_id: this.id,
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    },
+                    dataType: "json",
+                    success: function(json) {
+                        var jquery_td_id = '#order_status_' + json.order_id;
+                        $(jquery_td_id).html(json.status);
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <table>
+        <tr>
+            <th>Имя</th>
+            <th>Готовить</th>
+        </tr>
+        {% for product in products %}
+            <tr>
+                <td>product.name</td>
+                <td>
+
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

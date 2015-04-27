@@ -1,7 +1,7 @@
 # coding:utf-8
 import logging
 from pizza_delivery_app.models import VenueProduct, User, YdWallet
-from pizza_delivery_app.models.user import PAYMENT_TYPES, YANDEX_MONEY
+from pizza_delivery_app.models.user import PAYMENT_TYPES, YANDEX_MONEY, CASH
 
 __author__ = 'dvpermyakov'
 
@@ -54,6 +54,10 @@ def validate_order(order):
                     })
                 except YdWallet.DoesNotExist:
                     return error(u'Кошелек не найден')
+            if _type == CASH:
+                result.update({
+                    'cash': ''  # TODO: set it
+                })
         else:
             return error(u'Необходимо выбрать способ оплаты')
     if order.get('user'):

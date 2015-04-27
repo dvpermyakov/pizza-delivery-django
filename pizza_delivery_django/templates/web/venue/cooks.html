@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Повара</title>
+</head>
+<body>
+    <a href="/web/kitchen/signup/">Создать нового повара</a>
+    <table>
+        <tr>
+            <th>Имя</th>
+        </tr>
+        {% for cook in cooks %}
+            <tr>
+                <td>{{ cook.cook_name }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

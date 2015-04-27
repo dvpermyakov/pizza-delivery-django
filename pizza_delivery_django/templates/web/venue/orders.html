@@ -2,19 +2,57 @@
 <html>
 <head>
     <title>Заказы</title>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.confirm_btn').click(function(e){
+                e.preventDefault();
+
+                $.ajax({
+                    type: "POST",
+                    url: "{{ '/web/venue/orders/confirm/' }}",
+                    data: {
+                        order_id: this.id,
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    },
+                    dataType: "json",
+                    success: function(json) {
+                        var jquery_td_id = '#order_status_' + json.order_id;
+                        $(jquery_td_id).html(json.status);
+                    }
+                });
+            });
+        });
+    </script>
 </head>
 <body>
-    <table>
+    {% include 'web/header.html' %}
+
+    <a href="/web/venue/cooks/list">Повара</a>
+
+    <table style="border-collapse:collapse; width:100%" border="1">
         <tr>
             <th>Номер заказа</th>
             <th>Имя клиента</th>
             <th>Адрес клиента</th>
+            <th>Сумма</th>
             <th>Статус</th>
+            <th>Подтвердить</th>
         </tr>
         {% for order in orders %}
             <tr>
                 <td>{{ order.id }}</td>
-                <td>{{ order.client }}</td>
+                <td>{{ order.user.name }}</td>
+                <td>{{ order.user.address_str }}</td>
+                <td>{{ order.total_sum }}</td>
+                <td id="order_status_{{ order.id }}">{{ order.status }}</td>
+                <td>
+                    <form>
+                        <button class="confirm_btn" id="{{ order.id }}">
+                            Подтвердить
+                        </button>
+                    </form>
+                </td>
             </tr>
         {% endfor %}
     </table>

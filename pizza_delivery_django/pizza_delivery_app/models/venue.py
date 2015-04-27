@@ -71,6 +71,13 @@ class Venue(models.Model):
 
         return get_category_info(self.first_category)
 
+    @classmethod
+    def get_by_username(cls, username):
+        try:
+            return cls.objects.get(manager_username=username)
+        except Venue.DoesNotExist:
+            return None
+
     def dict(self):
         return {
             'id': self.id,

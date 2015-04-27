@@ -10,13 +10,15 @@ class Order(models.Model):
     NEW = 0
     CONFIRMED = 1
     COOKING = 2
-    DELIVERING = 3
-    CLOSED = 4
+    COOKED = 3
+    DELIVERING = 4
+    CLOSED = 5
 
     STATUS_CHOICES = (
         (NEW, u'Новый'),
         (CONFIRMED, u'был подтвержден'),
         (COOKING, u'готовится'),
+        (COOKING, U'был приготовлен'),
         (DELIVERING, u'доставляется'),
         (CLOSED, u'был закрыт')
     )
@@ -50,17 +52,36 @@ class Order(models.Model):
             self._change_status()
             self.save()
 
-    def start_cook(self):
+    def check_status_after_cooking(self):
         if self.status == self.CONFIRMED:
             self.status = self.COOKING
-            self._change_status()
             self.save()
+        for product in self.order_product.object.all():
+            if product.stats == OrderProduct.NEW:
+                return
+        self.status = self.COOKED
+        self.save()
 
 
 class OrderProduct(models.Model):
+    NEW = 0
+    COOKED = 1
+
+    STATUS_CHOICES = (
+        (NEW, u'Новый'),
+        (COOKED, u'Приготовлен')
+    )
+
     order = models.ForeignKey(Order, related_name='order_product')
     venue_product = models.ForeignKey(VenueProduct)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=NEW)
     total_sum = models.IntegerField()
+
+    def cook(self):
+        if self.status == self.NEW:
+            self.status = self.COOKED
+            self.save()
+        self.order.check_status_after_cooking()
 
     def dict(self):
         dict = self.venue_product.dict(product_include=False)

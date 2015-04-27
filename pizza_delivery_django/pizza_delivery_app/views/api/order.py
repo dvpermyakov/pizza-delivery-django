@@ -5,7 +5,7 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from pizza_delivery_app.methods.yandex_money import request_payment, process_payment
 from pizza_delivery_app.models import Order, OrderProduct
-from pizza_delivery_app.models.user import YANDEX_MONEY
+from pizza_delivery_app.models.user import YANDEX_MONEY, CASH
 
 __author__ = 'dvpermyakov'
 
@@ -32,10 +32,10 @@ def order(request):
         order = Order(total_sum=_dict['total_sum'], user=_dict['user'], venue=_dict['venue'])
         venue = _dict['venue']
         company = venue.company
-        wallet = _dict['wallet']
 
         is_payed = False
         if 'wallet' in _dict:
+            wallet = _dict['wallet']
             response = request_payment(wallet.token, order, company)
             if response.get('status') == 'success':
                 response = process_payment(response.get('request_id'), wallet.token)
@@ -47,6 +47,10 @@ def order(request):
                     return send_error(response.get('error'))
             elif response.get('status') == 'refused':
                 return send_error(response.get('error'))
+        if 'cash' in _dict:
+            is_payed = True
+            order.payment_type = CASH
+            order.payment_id = 0  # TODO: set it
 
         if not is_payed:
             return send_error(u'Не найден способ оплаты')

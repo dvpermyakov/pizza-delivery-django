@@ -1,12 +1,13 @@
-from django.http import HttpResponseBadRequest, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+import logging
+from django.core.context_processors import csrf
+from django.http import HttpResponseBadRequest, JsonResponse, HttpResponseForbidden
 from pizza_delivery_app.models import Order, Venue
-from datetime import datetime
+from datetime import datetime, timedelta
+from django.shortcuts import render
 
 __author__ = 'Administrator'
 
 
-@csrf_exempt  # TODO: remove it!
 def confirm_order(request):
     order_id = request.POST.get('order_id')
     try:
@@ -15,15 +16,24 @@ def confirm_order(request):
         return HttpResponseBadRequest()
     order.confirm()
     return JsonResponse({
-        'success': True
+        'order_id': order.id,
+        'status': order.status
     })
 
 
 def order_list(request):
-    venue_id = request.GET.get('venue_id')
-    try:
-        venue = Venue.objects.get(id=venue_id)
-    except Venue.DoesNotExist:
-        return HttpResponseBadRequest()
-    today = datetime.utcnow()
-    #orders = Order.objects.filter(created__gte=)
+    venue = Venue.get_by_username(request.user.username)
+    if not venue:
+        return HttpResponseForbidden()
+    venue.address.timezone_offset = 10800  # TODO: remove it! this is hardcode!
+    venue.address.save()
+    today = datetime.utcnow().replace(hour=0, minute=0) - timedelta(seconds=venue.address.timezone_offset)
+    orders = Order.objects.filter(created__gte=today)
+    for order in orders:
+        if order.user.address:
+            order.user.address_str = order.user.address.to_str()
+    values = {
+        'orders': orders
+    }
+    values.update(csrf(request))
+    return render(request, 'web/venue/orders.html', values)
