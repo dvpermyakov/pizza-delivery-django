@@ -63,6 +63,7 @@ class Order(models.Model):
             if product.status == OrderProduct.NEW:
                 return
         self.status = self.COOKED
+        self._change_status()
         self.save()
 
 
