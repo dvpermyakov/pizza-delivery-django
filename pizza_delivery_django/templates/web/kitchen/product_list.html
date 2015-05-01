@@ -10,15 +10,14 @@
 
                 $.ajax({
                     type: "POST",
-                    url: "{{ '/web/venue/orders/confirm/' }}",
+                    url: "{{ '/web/kitchen/products/cook/' }}",
                     data: {
-                        order_id: this.id,
+                        product_id: this.id,
                         csrfmiddlewaretoken: "{{ csrf_token }}"
                     },
                     dataType: "json",
                     success: function(json) {
-                        var jquery_td_id = '#order_status_' + json.order_id;
-                        $(jquery_td_id).html(json.status);
+                        // todo: set here
                     }
                 });
             });
@@ -26,6 +25,7 @@
     </script>
 </head>
 <body>
+    {% include 'web/header.html' %}
     <table>
         <tr>
             <th>Имя</th>
@@ -33,9 +33,13 @@
         </tr>
         {% for product in products %}
             <tr>
-                <td>product.name</td>
+                <td>{{ product.name }}</td>
                 <td>
-
+                    <form>
+                        <button class="cook_btn" id="{{ product.id }}">
+                            Готовить
+                        </button>
+                    </form>
                 </td>
             </tr>
         {% endfor %}

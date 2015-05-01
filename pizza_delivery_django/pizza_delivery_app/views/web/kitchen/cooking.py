@@ -1,29 +1,33 @@
+import logging
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render
-from pizza_delivery_app.models import Cook, CookedProduct, VenueProduct
-from pizza_delivery_app.models.order import OrderProduct
+from django.views.decorators.csrf import csrf_exempt
+from pizza_delivery_app.models import Cook, CookedOrderedProduct
 
 __author__ = 'dvpermyakov'
 
 
+@csrf_exempt  # todo: delete it
 def cook_item(request):
-    order_product_id = request.POST.get('order_product_id')
+    product_id = request.POST.get('product_id')
     try:
-        order_product = OrderProduct.objects.get(id=order_product_id)
-    except OrderProduct.DoesNotExist:
+        product = CookedOrderedProduct.objects.get(id=product_id)
+    except CookedOrderedProduct.DoesNotExist:
         return HttpResponseBadRequest()
-    order_product.cook()
+    product.set_cooked()
+    product.product.cook()
     return JsonResponse({
-        'order_product_id': order_product.id,
-        'status': order_product.status
+        'product_id': product_id,
+        'status': product.status
     })
 
 
 def cooking_list(request):
     cook = Cook.get_cook_by_username(request.user.username)
-    cooked_products = [VenueProduct.objects.filter(venue=cook.venue, product=product) for product in CookedProduct.objects.filter(cook=cook)]
-    items = OrderProduct.objects.filter(status=OrderProduct.NEW, venue_product__in=cooked_products)
+    products = CookedOrderedProduct.objects.filter(cook=cook)
+    for product in products:
+        product.name = product.product.venue_product.product.name
     values = {
-        'products': items
+        'products': products
     }
     return render(request, 'web/kitchen/product_list.html', values)

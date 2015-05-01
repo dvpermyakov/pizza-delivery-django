@@ -47,8 +47,11 @@ class Order(models.Model):
         }
 
     def confirm(self):
+        from pizza_delivery_app.models import Cook, CookedOrderedProduct
         if self.status == self.NEW:
             self.status = self.CONFIRMED
+            for product in OrderProduct.objects.filter(order=self):
+                CookedOrderedProduct(product=product, cook=Cook.get_cook_by_order_product(product)).save()
             self._change_status()
             self.save()
 
@@ -56,8 +59,8 @@ class Order(models.Model):
         if self.status == self.CONFIRMED:
             self.status = self.COOKING
             self.save()
-        for product in self.order_product.object.all():
-            if product.stats == OrderProduct.NEW:
+        for product in self.order_product.all():
+            if product.status == OrderProduct.NEW:
                 return
         self.status = self.COOKED
         self.save()

@@ -31,7 +31,7 @@ urlpatterns = patterns('',
 
     url(r'^web/kitchen/signup/$', kitchen.signup),
     url(r'^web/kitchen/products/list/$', kitchen.cooking_list),
-    url(r'^web/kitchen/products/cook/$', kitchen.cooking_list),
+    url(r'^web/kitchen/products/cook/$', kitchen.cook_item),
 
     url(r'^web/company/signup/$', company.signup),
     url(r'^web/company/main/$', company.main_page),

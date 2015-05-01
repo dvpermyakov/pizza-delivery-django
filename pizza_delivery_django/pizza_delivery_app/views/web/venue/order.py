@@ -1,6 +1,7 @@
 import logging
 from django.core.context_processors import csrf
 from django.http import HttpResponseBadRequest, JsonResponse, HttpResponseForbidden
+from django.views.decorators.csrf import csrf_exempt
 from pizza_delivery_app.models import Order, Venue
 from datetime import datetime, timedelta
 from django.shortcuts import render
@@ -8,6 +9,7 @@ from django.shortcuts import render
 __author__ = 'Administrator'
 
 
+@csrf_exempt  # todo: delete it
 def confirm_order(request):
     order_id = request.POST.get('order_id')
     try:
@@ -25,10 +27,10 @@ def order_list(request):
     venue = Venue.get_by_username(request.user.username)
     if not venue:
         return HttpResponseForbidden()
-    venue.address.timezone_offset = 10800  # TODO: remove it! this is hardcode!
-    venue.address.save()
+    #venue.address.timezone_offset = 10800  # TODO: remove it! this is hardcode!
+    #venue.address.save()
     today = datetime.utcnow().replace(hour=0, minute=0) - timedelta(seconds=venue.address.timezone_offset)
-    orders = Order.objects.filter(created__gte=today)
+    orders = Order.objects.filter(venue=venue, created__gte=today)
     for order in orders:
         if order.user.address:
             order.user.address_str = order.user.address.to_str()
