@@ -2,6 +2,6 @@ from menu import Product, Category, SingleModifier, GroupModifier, GroupModifier
 from venue import Venue, VenueGroupModifier, VenueGroupModifierItem, VenueModifier, VenueProduct
 from address import Address, GeoPoint, GeoRib
 from company import Company
-from user import User, YdWallet
+from user import User, YdWallet, Rating
 from order import OrderProduct, Order
 from kitchen import Cook, CookedProduct, CookedOrderedProduct

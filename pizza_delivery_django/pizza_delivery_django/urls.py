@@ -9,16 +9,17 @@ urlpatterns = patterns('',
 
     url(r'^api/yandex_money/auth/$', user.auth),
     url(r'^api/yandex_money/get_balance/$', user.get_balance),
-    url(r'^api/user/card/success', user.set_token),  # callback after filling data in yd
+    url(r'^api/user/card/success/$', user.set_token),  # callback after filling data in yd
 
     url(r'^api/user/create_or_update/$', user.create_or_update),
-    url(r'^api/user/payments/avail', user.available_payment_types),
-    url(r'^api/user/history', user.order_history),
+    url(r'^api/user/payments/avail/$', user.available_payment_types),
+    url(r'^api/user/history/$', user.order_history),
+    url(r'^api/user/ratings/$', user.set_rating),
 
     url(r'^api/address/get_home/by_coordinates/$', api.get_home_by_coordinates),
 
-    url(r'^api/order', api.order),
-    url(r'^api/check_order', api.check_order),
+    url(r'^api/order/$', api.order),
+    url(r'^api/check_order/$', api.check_order),
 
     url(r'^api/menu/$', api.menu),
     url(r'^api/menu/last_modified/$', api.last_modified_menu),

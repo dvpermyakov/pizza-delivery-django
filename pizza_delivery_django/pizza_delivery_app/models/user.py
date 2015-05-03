@@ -1,5 +1,5 @@
 from django.db import models
-from pizza_delivery_app.models import Address
+from pizza_delivery_app.models import Address, Product
 
 __author__ = 'dvpermyakov'
 
@@ -34,3 +34,9 @@ class YdWallet(models.Model):
         return {
             'number': self.number
         }
+
+
+class Rating(models.Model):
+    user = models.ForeignKey(User, related_name='rating')
+    rating = models.FloatField()
+    product = models.ForeignKey(Product)
