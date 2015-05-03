@@ -134,7 +134,7 @@ class VenueGroupModifier(models.Model):
                                                       group_modifier_item__in=self.group_modifier.modifier.choices)]
 
 
-class VenueGroupModifierItem(models.Model):  # TODO: fuck this!
+class VenueGroupModifierItem(models.Model):  # TODO: deprecated
     AVAIL = 0
     UNAVAIL = 1
 

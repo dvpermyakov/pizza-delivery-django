@@ -16,7 +16,8 @@ class Cook(models.Model):
     @classmethod
     def get_cook_by_order_product(cls, ordered_product):
         cooks = [product.cook
-                 for product in CookedProduct.objects.filter(product=ordered_product.venue_product.product)]
+                 for product in CookedProduct.objects.filter(product=ordered_product.venue_product.product,
+                                                             venue=ordered_product.venue_product.venue)]
         if cooks:
             return cooks[0]
         else:
@@ -25,6 +26,7 @@ class Cook(models.Model):
 
 class CookedProduct(models.Model):
     cook = models.ForeignKey(Cook, null=True)
+    venue = models.ForeignKey(Venue)
     product = models.ForeignKey(Product)
 
 

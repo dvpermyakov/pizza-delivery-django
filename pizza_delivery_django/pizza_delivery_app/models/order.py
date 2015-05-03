@@ -1,5 +1,4 @@
 # coding: utf-8
-import logging
 from django.db import models
 from pizza_delivery_app.models import VenueProduct, User, Venue
 from pizza_delivery_app.methods.times import timestamp

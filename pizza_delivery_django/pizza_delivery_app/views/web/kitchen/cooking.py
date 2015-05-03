@@ -50,13 +50,14 @@ def cooking_list(request):
 
 
 def new_products(request):
+    cook = Cook.get_cook_by_username(request.user.username)
     last_time = request.GET.get('last_time')
     today = datetime.utcnow().replace(hour=0, minute=0, second=0)
     if timestamp(today) > int(last_time):
         last_time = timestamp(today)
     if last_time:
         last_time = datetime.utcfromtimestamp(int(last_time))
-        products = CookedOrderedProduct.objects.filter(created__gt=last_time)
+        products = CookedOrderedProduct.objects.filter(created__gt=last_time, cook=cook)
         if products:
             products, last_time = _prepare_products(products)
             product_dicts = [product.dict() for product in products]

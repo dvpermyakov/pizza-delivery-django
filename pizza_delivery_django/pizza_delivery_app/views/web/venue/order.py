@@ -96,6 +96,7 @@ def order_list(request):
 
 
 def new_orders(request):
+    venue = Venue.get_by_username(request.user.username)
     last_time = request.GET.get('last_time')
     today = datetime.utcnow().replace(hour=0, minute=0, second=0)
     if timestamp(today) > int(last_time):
@@ -103,7 +104,7 @@ def new_orders(request):
     if last_time:
         logging.error(last_time)
         last_time = datetime.utcfromtimestamp(int(last_time))
-        orders = Order.objects.filter(created__gt=last_time)
+        orders = Order.objects.filter(created__gt=last_time, venue=venue)
         if orders:
             orders, last_time = _prepare_orders(orders)
             order_dicts = [order.dict() for order in orders]

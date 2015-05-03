@@ -59,7 +59,7 @@ def signup(request):
             cook = Cook(venue=venue, cook_name=cook.username)
             cook.save()
             for product_id in products:
-                CookedProduct(cook=cook, product=Product.objects.get(id=product_id)).save()
+                CookedProduct(cook=cook, product=Product.objects.get(id=product_id), venue=venue).save()
 
             return redirect('/web/venue/cooks/list/')
         else:
