@@ -85,7 +85,7 @@ def order_list(request):
     orders, last_time = _prepare_orders(orders)
     values = {
         'orders': orders,
-        'last_time': last_time,
+        'last_time': last_time + 1,
         'statuses': [{
             'name': status[1],
             'value': status[0]
@@ -101,6 +101,7 @@ def new_orders(request):
     if timestamp(today) > int(last_time):
         last_time = timestamp(today)
     if last_time:
+        logging.error(last_time)
         last_time = datetime.utcfromtimestamp(int(last_time))
         orders = Order.objects.filter(created__gt=last_time)
         if orders:
@@ -124,7 +125,7 @@ def new_orders(request):
             last_time = timestamp(last_time)
         return JsonResponse({
             'orders': order_dicts,
-            'last_time': last_time
+            'last_time': last_time if not order_dicts else last_time + 1
         })
     else:
         return HttpResponseBadRequest()
@@ -132,6 +133,8 @@ def new_orders(request):
 
 def update_statuses(request):
     orders = request.GET.get('orders')
+    if not orders:
+        return HttpResponseBadRequest()
     orders = orders.split(',')
     response = []
     for order_id_full in orders:

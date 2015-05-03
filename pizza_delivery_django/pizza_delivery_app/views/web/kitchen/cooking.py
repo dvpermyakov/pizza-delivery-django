@@ -44,7 +44,7 @@ def cooking_list(request):
     products, last_time = _prepare_products(products)
     values = {
         'products': products,
-        'last_time': last_time
+        'last_time': last_time + 1
     }
     return render(request, 'web/kitchen/product_list.html', values)
 
@@ -52,7 +52,7 @@ def cooking_list(request):
 def new_products(request):
     last_time = request.GET.get('last_time')
     today = datetime.utcnow().replace(hour=0, minute=0, second=0)
-    if timestamp(today) > last_time:
+    if timestamp(today) > int(last_time):
         last_time = timestamp(today)
     if last_time:
         last_time = datetime.utcfromtimestamp(int(last_time))
@@ -65,7 +65,7 @@ def new_products(request):
             last_time = timestamp(last_time)
         return JsonResponse({
             'products': product_dicts,
-            'last_time': last_time
+            'last_time': last_time if not product_dicts else last_time + 1
         })
     else:
         return HttpResponseBadRequest()
