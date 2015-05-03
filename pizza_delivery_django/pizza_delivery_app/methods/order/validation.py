@@ -40,26 +40,6 @@ def _validate_products(products):
 
 def validate_order(order):
     result = {}
-    if order.get('payment_type'):
-        payment_type = order['payment_type']
-        if payment_type.get('type') is not None:
-            _type = payment_type['type']
-            if _type not in PAYMENT_TYPES:
-                return error(u'Недоступный способ оплаты')
-            if _type == YANDEX_MONEY:
-                try:
-                    wallet = YdWallet.objects.get(number=payment_type.get('number'))
-                    result.update({
-                        'wallet': wallet
-                    })
-                except YdWallet.DoesNotExist:
-                    return error(u'Кошелек не найден')
-            if _type == CASH:
-                result.update({
-                    'cash': ''  # TODO: set it
-                })
-        else:
-            return error(u'Необходимо выбрать способ оплаты')
     if order.get('user'):
         user = order['user']
         try:
@@ -71,6 +51,26 @@ def validate_order(order):
             return error(u'Неправильное присвоение id')
     else:
         return error(u'Неавторизованный пользователь')
+    if order.get('payment_type'):
+        payment_type = order['payment_type']
+        if payment_type.get('type') is not None:
+            _type = payment_type['type']
+            if _type not in PAYMENT_TYPES:
+                return error(u'Недоступный способ оплаты')
+            if _type == YANDEX_MONEY:
+                try:
+                    wallet = YdWallet.objects.get(number=payment_type.get('number'), user=user_obj)
+                    result.update({
+                        'wallet': wallet
+                    })
+                except YdWallet.DoesNotExist:
+                    return error(u'Кошелек не найден')
+            if _type == CASH:
+                result.update({
+                    'cash': ''  # TODO: set it
+                })
+        else:
+            return error(u'Необходимо выбрать способ оплаты')
     if order.get('products'):
         success, _dict = _validate_products(order['products'])
         if not success:
