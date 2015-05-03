@@ -14,7 +14,10 @@ class Address(models.Model):
     home = models.CharField(max_length=255)
 
     def to_str(self):
-        return '%s, %s, %s' % (self.city, self.street, self.home)
+        if self.city and self.street and self.home:
+            return '%s, %s, %s' % (self.city, self.street, self.home)
+        else:
+            return ''
 
     def dict(self):
         return {

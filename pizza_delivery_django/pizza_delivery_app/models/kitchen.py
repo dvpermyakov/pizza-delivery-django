@@ -41,8 +41,17 @@ class CookedOrderedProduct(models.Model):
     updated = models.DateTimeField(auto_now=True)
     status = models.IntegerField(choices=STATUS_CHOICES, default=NEW)
     cook = models.ForeignKey(Cook, null=True)
-    product = models.ForeignKey(OrderProduct)
+    product = models.OneToOneField(OrderProduct)
 
     def set_cooked(self):
         self.status = self.COOKED
         self.save()
+
+    def dict(self):
+        return {
+            'id': self.id,
+            'number': self.product.id,
+            'status': self.status,
+            'status_name': self.STATUS_CHOICES[self.status][1],
+            'name': self.product.venue_product.product.name
+        }

@@ -1,33 +1,71 @@
+from datetime import datetime
 import logging
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
+from pizza_delivery_app.methods.times import timestamp
 from pizza_delivery_app.models import Cook, CookedOrderedProduct
 
 __author__ = 'dvpermyakov'
 
 
-@csrf_exempt  # todo: delete it
 def cook_item(request):
     product_id = request.POST.get('product_id')
     try:
         product = CookedOrderedProduct.objects.get(id=product_id)
     except CookedOrderedProduct.DoesNotExist:
         return HttpResponseBadRequest()
+    old_status = product.status
     product.set_cooked()
     product.product.cook()
     return JsonResponse({
-        'product_id': product_id,
-        'status': product.status
+        'id': product.id,
+        'number': product.product.id,
+        'status_name': CookedOrderedProduct.STATUS_CHOICES[product.status][1],
+        'status': product.status,
+        'old_status': old_status
     })
+
+
+def _prepare_products(products):
+    last_time = 0
+    for product in products:
+        if timestamp(product.created) > last_time:
+            last_time = timestamp(product.created)
+        product.name = product.product.venue_product.product.name
+        product.status_name = CookedOrderedProduct.STATUS_CHOICES[product.status][1]
+        product.number = product.product.id
+    return products, last_time
 
 
 def cooking_list(request):
     cook = Cook.get_cook_by_username(request.user.username)
-    products = CookedOrderedProduct.objects.filter(cook=cook)
-    for product in products:
-        product.name = product.product.venue_product.product.name
+    today = datetime.utcnow().replace(hour=0, minute=0, second=0)
+    products = CookedOrderedProduct.objects.filter(cook=cook, created__gte=today)
+    products, last_time = _prepare_products(products)
     values = {
-        'products': products
+        'products': products,
+        'last_time': last_time
     }
     return render(request, 'web/kitchen/product_list.html', values)
+
+
+def new_products(request):
+    last_time = request.GET.get('last_time')
+    today = datetime.utcnow().replace(hour=0, minute=0, second=0)
+    if timestamp(today) > last_time:
+        last_time = timestamp(today)
+    if last_time:
+        last_time = datetime.utcfromtimestamp(int(last_time))
+        products = CookedOrderedProduct.objects.filter(created__gt=last_time)
+        if products:
+            products, last_time = _prepare_products(products)
+            product_dicts = [product.dict() for product in products]
+        else:
+            product_dicts = []
+            last_time = timestamp(last_time)
+        return JsonResponse({
+            'products': product_dicts,
+            'last_time': last_time
+        })
+    else:
+        return HttpResponseBadRequest()

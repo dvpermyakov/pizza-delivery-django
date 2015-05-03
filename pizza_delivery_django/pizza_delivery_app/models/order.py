@@ -1,4 +1,5 @@
 # coding: utf-8
+import logging
 from django.db import models
 from pizza_delivery_app.models import VenueProduct, User, Venue
 from pizza_delivery_app.methods.times import timestamp
@@ -15,10 +16,10 @@ class Order(models.Model):
     CLOSED = 5
 
     STATUS_CHOICES = (
-        (NEW, u'Новый'),
+        (NEW, u'новый'),
         (CONFIRMED, u'был подтвержден'),
         (COOKING, u'готовится'),
-        (COOKING, U'был приготовлен'),
+        (COOKED, U'был приготовлен'),
         (DELIVERING, u'доставляется'),
         (CLOSED, u'был закрыт')
     )
@@ -41,10 +42,15 @@ class Order(models.Model):
         return {
             'order_id': self.id,
             'created': timestamp(self.created),
+            'updated': timestamp(self.updated),
             'total_sum': self.total_sum,
             'products': [product.dict() for product in OrderProduct.objects.filter(order=self)],
-            'status': self.status
+            'status': self.status,
+            'user': self.user.dict()
         }
+
+    def get_products(self):
+        return OrderProduct.objects.filter(order=self)
 
     def confirm(self):
         from pizza_delivery_app.models import Cook, CookedOrderedProduct
@@ -55,7 +61,20 @@ class Order(models.Model):
             self._change_status()
             self.save()
 
+    def deliver(self):
+        if self.status == self.COOKED:
+            self.status = self.DELIVERING
+            self._change_status()
+            self.save()
+
+    def close(self):
+        if self.status == self.DELIVERING:
+            self.status = self.CLOSED
+            self._change_status()
+            self.save()
+
     def check_status_after_cooking(self):
+        self.save()
         if self.status == self.CONFIRMED:
             self.status = self.COOKING
             self.save()
@@ -88,8 +107,10 @@ class OrderProduct(models.Model):
         self.order.check_status_after_cooking()
 
     def dict(self):
-        dict = self.venue_product.dict(product_include=False)
+        dict = self.venue_product.product_dict()
         dict.update({
-            'total_sum': self.total_sum
+            'order_product_id': self.id,
+            'total_sum': self.total_sum,
+            'status': self.status
         })
         return dict

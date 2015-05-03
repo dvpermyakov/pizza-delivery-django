@@ -20,6 +20,7 @@ class User(models.Model):
         return {
             'id': self.id,
             'address': self.address.dict() if self.address else None,
+            'address_str': self.address.to_str() if self.address else None,
             'name': self.name
         }
 

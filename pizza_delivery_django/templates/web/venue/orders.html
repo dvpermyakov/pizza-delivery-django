@@ -4,55 +4,277 @@
     <title>Заказы</title>
     <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
     <script>
-        $(document).ready(function() {
-            $('.confirm_btn').click(function(e){
-                e.preventDefault();
-
-                $.ajax({
-                    type: "POST",
-                    url: "{{ '/web/venue/orders/confirm/' }}",
-                    data: {
-                        order_id: this.id,
-                        csrfmiddlewaretoken: "{{ csrf_token }}"
-                    },
-                    dataType: "json",
-                    success: function(json) {
-                        var jquery_td_id = '#order_status_' + json.order_id;
-                        $(jquery_td_id).html(json.status);
+        {% load customized %}
+        var last_time = {{ last_time }};
+        var statuses = [];
+        var order_ids = [];
+        var order_length = 0;
+        {% for order in orders %}
+            {% if order.status_class == 1 or order.status_class == 2 %}
+                order_ids[order_length] = {{ order.id }}
+                order_length += 1;
+            {% endif %}
+        {% endfor %}
+        {% for status in statuses %}
+            statuses[{{ forloop.counter0 }}] = {{ status|as_dict:'value' }};
+        {% endfor %}
+        function check_orders() {
+            $.ajax({
+                type: "GET",
+                url: "{{ '/web/venue/orders/new/' }}",
+                data: {
+                    last_time: last_time
+                },
+                dataType: "json",
+                success: function(json) {
+                    last_time = json.last_time;
+                    for (var i = 0; i < json.orders.length; i++) {
+                        add_order(json.orders[i]);
                     }
-                });
+                }
             });
+        }
+        function confirm(e){
+            e.preventDefault();
+            var button_id = '#' + this.id;
+            if (!$(button_id).hasClass('confirm_btn')) {
+                return;
+            }
+            $.ajax({
+                type: "POST",
+                url: "{{ '/web/venue/orders/confirm/' }}",
+                data: {
+                    order_id: this.id,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                dataType: "json",
+                success: function(json) {
+                    var jquery_td_id = '#order_status_' + json.order_id;
+                    var order_tr = ".order_" + json.order_id;
+                    $(jquery_td_id).html(json.status);
+                    $(order_tr).removeClass('tr_' + json.status_class_old);
+                    $(order_tr).addClass('tr_' + json.status_class);
+                    $(button_id).html('Отправить в доставку');
+                    $(button_id).attr("disabled", true);
+                    toggle_tr_appearance();
+                    order_ids[order_length] = json.order_id;
+                    order_length += 1;
+                }
+            });
+        }
+        function deliver(e){
+            e.preventDefault();
+            var button_id = '#' + this.id;
+            $.ajax({
+                type: "POST",
+                url: "{{ '/web/venue/orders/deliver/' }}",
+                data: {
+                    order_id: this.id,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                dataType: "json",
+                success: function(json) {
+                    var jquery_td_id = '#order_status_' + json.order_id;
+                    var order_tr = ".order_" + json.order_id;
+                    $(jquery_td_id).html(json.status);
+                    $(order_tr).removeClass('tr_' + json.status_class_old);
+                    $(order_tr).addClass('tr_' + json.status_class);
+                    $(button_id).html('Закрыть заказ');
+                    $(button_id).removeClass();
+                    $(button_id).addClass('close_btn');
+                    $(button_id).attr("disabled", false);
+                    $('.close_btn').click(close);
+                    toggle_tr_appearance();
+                }
+            });
+        }
+        function close(e){
+            e.preventDefault();
+            var button_id = '#' + this.id;
+            $.ajax({
+                type: "POST",
+                url: "{{ '/web/venue/orders/close/' }}",
+                data: {
+                    order_id: this.id,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                dataType: "json",
+                success: function(json) {
+                    var jquery_td_id = '#order_status_' + json.order_id;
+                    var order_tr = ".order_" + json.order_id;
+                    $(jquery_td_id).html(json.status);
+                    $(order_tr).removeClass('tr_' + json.status_class_old);
+                    $(order_tr).addClass('tr_' + json.status_class);
+                    $(button_id).attr("disabled", true);
+                    toggle_tr_appearance();
+                }
+            });
+        }
+        function update_statuses() {
+            var orders = '';
+            for (var i = 0; i < order_ids.length; i++) {
+                if (i > 0) {
+                    orders += ',';
+                }
+                orders += order_ids[i] + '_' + $('#order_status_' + order_ids[i]).html()
+                        + '_' + $('#order_updated_' + order_ids[i]).html();
+            }
+            $.ajax({
+                type: "GET",
+                url: "{{ '/web/venue/orders/update/' }}",
+                data: {
+                    orders: orders
+                },
+                dataType: "json",
+                success: function(json) {
+                    for (var i = 0; i < json.orders.length; i++) {
+                        var jquery_td_id = '#order_status_' + json.orders[i].order_id;
+                        var order_tr = ".order_" + json.orders[i].order_id;
+                        for (var j = 0; j < json.orders[i].products.length; j++) {
+                            var product_status = "#product_status_" + json.orders[i].products[j].product_id;
+                            $(product_status).html(json.orders[i].products[j].product_status);
+                        }
+                        $(jquery_td_id).html(json.orders[i].status);
+                        $(order_tr).removeClass('tr_' + json.orders[i].status_class_old);
+                        $(order_tr).addClass('tr_' + json.orders[i].status_class);
+                        if (json.orders[i].status_class == 3) {
+                            var index = order_ids.indexOf(json.orders[i].order_id);
+                            order_ids.splice(index, 1);
+                            order_length -= 1;
+                            var button_id = '#' + json.orders[i].order_id;
+                            $(button_id).removeClass();
+                            $(button_id).addClass('deliver_btn');
+                            $(button_id).attr("disabled", false);
+                        }
+                        toggle_tr_appearance();
+                    }
+                    $('.deliver_btn').click(deliver);
+                }
+            });
+        }
+        function add_order(order) {
+            var len = order.products.length;
+            var products = '';
+            for (var i = 0; i < order.products.length; i++) {
+                products += '<td>' + order.products[i].name + '</td>';
+                products += '<td>' + order.products[i].order_product_id + '</td>';
+                products += '<td id="product_status_' + order.products[i].order_product_id + '">' + order.products[i].status + '</td>';
+                if (i < order.products.length - 1) {
+                    products += '</tr><tr class="tr_' + order.status_class + ' order_' + order.order_id + '">'
+                }
+            }
+            $('#order_table tr:last').after(
+                '<tr class="tr_' +  order.status_class + ' order_' + order.order_id + '">' +
+                    '<td rowspan="' + len + '">' + order.order_id + '</td>' +
+                    '<td rowspan="' + len + '">' + order.user.name + '</td>' +
+                    '<td rowspan="' + len + '">' + order.user.address_str + '</td>' +
+                    '<td rowspan="' + len + '">' + order.created_time + '</td>' +
+                    '<td rowspan="' + len + '" id="order_updated_' + order.order_id + '">' + order.updated_time + '</td>' +
+                    '<td rowspan="' + len + '">' + order.total_sum + '</td>' +
+                    '<td rowspan="' + len + '" id="order_status_' + order.order_id + '">' + order.status + '</td>' +
+                    '<td rowspan="' + len + '">' +
+                        '<form>' +
+                            '<button class="confirm_btn" id="' + order.order_id + '">' +
+                                'Подтвердить' +
+                            '</button>' +
+                        '</form>' +
+                    '</td>' + products +
+                '</tr>'
+            );
+            $('.confirm_btn').click(confirm);
+            toggle_tr_appearance();
+            if (order.order_id == 1 || order.order_id == 2) {
+                order_ids[order_length] = order.order_id;
+                order_length += 1;
+            }
+        }
+        function toggle_tr_appearance() {
+            for (var i = 0; i < statuses.length; i++) {
+                var jquery_cb = "#cb_" + statuses[i];
+                var jquery_td_id = '.tr_' + statuses[i];
+                if ($(jquery_cb).prop("checked")) {
+                    $(jquery_td_id).show();
+                } else {
+                    $(jquery_td_id).hide();
+                }
+
+            }
+        }
+        $(document).ready(function() {
+            setInterval(check_orders, 10000);
+            setInterval(update_statuses, 10000);
+            $('.confirm_btn').click(confirm);
+            $('.deliver_btn').click(deliver);
+            $('.close_btn').click(close);
+            $('.check_status').change(toggle_tr_appearance);
         });
     </script>
 </head>
 <body>
     {% include 'web/header.html' %}
-
-    <a href="/web/venue/cooks/list">Повара</a>
-
-    <table style="border-collapse:collapse; width:100%" border="1">
+    <a href="/web/venue/cooks/list">Повара</a><br>
+    {% for status in statuses %}
+        <label>
+            {{ status|as_dict:'name' }}
+            <input type="checkbox" class="check_status" id="cb_{{ status|as_dict:'value' }}" checked>
+        </label><br>
+    {% endfor %}
+    <table style="border-collapse:collapse; width:100%" border="1" id='order_table'>
         <tr>
             <th>Номер заказа</th>
             <th>Имя клиента</th>
             <th>Адрес клиента</th>
+            <th>Время заказа</th>
+            <th>Время последнего обновления</th>
             <th>Сумма</th>
-            <th>Статус</th>
-            <th>Подтвердить</th>
+            <th>Статус Заказа</th>
+            <th>Изменить статуса заказа</th>
+            <th>Продукты</th>
+            <th>Номер продукта</th>
+            <th>Статус продукта</th>
         </tr>
         {% for order in orders %}
-            <tr>
-                <td>{{ order.id }}</td>
-                <td>{{ order.user.name }}</td>
-                <td>{{ order.user.address_str }}</td>
-                <td>{{ order.total_sum }}</td>
-                <td id="order_status_{{ order.id }}">{{ order.status }}</td>
-                <td>
+            <tr class="tr_{{ order.status_class }} order_{{ order.id }}">
+                <td rowspan="{{ order.products|length }}">{{ order.id }}</td>
+                <td rowspan="{{ order.products|length }}">{{ order.user.name }}</td>
+                <td rowspan="{{ order.products|length }}">{{ order.user.address_str }}</td>
+                <td rowspan="{{ order.products|length }}">{{ order.created_time }}</td>
+                <td rowspan="{{ order.products|length }}" id="order_updated_{{ order.id }}">{{ order.updated_time }}</td>
+                <td rowspan="{{ order.products|length }}">{{ order.total_sum }}</td>
+                <td rowspan="{{ order.products|length }}" id="order_status_{{ order.id }}">{{ order.status }}</td>
+                <td rowspan="{{ order.products|length }}">
                     <form>
-                        <button class="confirm_btn" id="{{ order.id }}">
-                            Подтвердить
-                        </button>
+                        {% if order.status == 'новый' %}
+                            <button class="confirm_btn" id="{{ order.id }}">
+                                Подтвердить
+                            </button>
+                        {% elif order.status == 'был подтвержден' or order.status == 'готовится' %}
+                            <button class="confirm_btn" id="{{ order.id }}" disabled>
+                                Отправить в доставку
+                            </button>
+                        {% elif order.status == 'был приготовлен' %}
+                            <button class="deliver_btn" id="{{ order.id }}">
+                                Отправить в доставку
+                            </button>
+                        {% elif order.status == 'доставляется' %}
+                            <button class="close_btn" id="{{ order.id }}">
+                                Закрыть заказ
+                            </button>
+                        {% elif order.status == 'был закрыт' %}
+                            <button class="close_btn" id="{{ order.id }}" disabled>
+                                Закрыть заказ
+                            </button>
+                        {% endif %}
                     </form>
                 </td>
+                {% for product in order.products %}
+                    <td>{{ product.dict|as_dict:'name' }}</td>
+                    <td>{{ product.id }}</td>
+                    <td id="product_status_{{ product.id }}">{{ product.status }}</td>
+                    {% if forloop.counter < order.products|length %}
+                        </tr><tr class="tr_{{ order.status_class }} order_{{ order.id }}">
+                    {% endif %}
+                {% endfor %}
             </tr>
         {% endfor %}
     </table>

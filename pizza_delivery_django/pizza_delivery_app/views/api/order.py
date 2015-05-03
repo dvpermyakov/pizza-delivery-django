@@ -20,7 +20,6 @@ def order(request):
             'description': description
         })
 
-    logging.error(request.POST)
     try:
         order_obj = json.loads(request.POST.get('order'))
     except ValueError:

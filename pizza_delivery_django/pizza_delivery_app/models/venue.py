@@ -184,3 +184,13 @@ class VenueProduct(models.Model):
         if product_include:
             product_dict = self.product.dict()
         return product_dict
+
+    def product_dict(self):
+        dict = self.product.product_dict()
+        dict.update({
+            'venue_product_id': self.id,
+            'venue_id': self.venue.id,
+            'price': self.price,
+            'status': self.status
+        })
+        return dict

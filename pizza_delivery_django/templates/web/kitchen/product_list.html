@@ -4,39 +4,98 @@
     <title>Кухня</title>
     <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
     <script>
-        $(document).ready(function() {
-            $('.cook_btn').click(function(e){
-                e.preventDefault();
-
-                $.ajax({
-                    type: "POST",
-                    url: "{{ '/web/kitchen/products/cook/' }}",
-                    data: {
-                        product_id: this.id,
-                        csrfmiddlewaretoken: "{{ csrf_token }}"
-                    },
-                    dataType: "json",
-                    success: function(json) {
-                        // todo: set here
+        var last_time = {{ last_time }};
+        function add_product(product) {
+            var products_tr = '' +
+                '<tr class="product_' + product.number + ' status_' + product.status + '">' +
+                    '<td>' + product.number + '</td>' +
+                    '<td>' + product.name + '</td>' +
+                    '<td id="td_status_' + product.number + '">' + product.status_name + '</td>' +
+                    '<td>' +
+                        '<form>' +
+                            '<button class="cook_btn" id="' + product.id + '">' +
+                                'Готовить' +
+                            '</button>' +
+                        '</form>' +
+                    '</td>' +
+                '</tr>'
+            $('#product_table tr:last').after(products_tr);
+        }
+        function check_new() {
+            $.ajax({
+                type: "GET",
+                url: "{{ '/web/kitchen/products/new/' }}",
+                data: {
+                    last_time: last_time
+                },
+                dataType: "json",
+                success: function(json) {
+                    last_time = json.last_time;
+                    for (var i = 0; i < json.products.length; i++) {
+                        add_product(json.products[i]);
                     }
-                });
+                    toggle_trs();
+                    $('.cook_btn').click(cook);
+                }
             });
+        }
+        function toggle_trs() {
+            if ($('#cb_cooked').prop("checked")) {
+                $('.status_1').show();
+            } else {
+                $('.status_1').hide();
+            }
+        }
+        function cook(e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "{{ '/web/kitchen/products/cook/' }}",
+                data: {
+                    product_id: this.id,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                dataType: "json",
+                success: function(json) {
+                    var jquery_td_id = '#td_status_' + json.number;
+                    $(jquery_td_id).html(json.status_name);
+                    var jquery_product = '.product_' + json.number;
+                    $(jquery_product).removeClass('status_' + json.status_old);
+                    $(jquery_product).addClass('status_' + json.status);
+                    toggle_trs();
+                    $('#' + json.id).attr("disabled", true);
+                }
+            });
+        }
+        $(document).ready(function() {
+            setInterval(check_new, 10000);
+            $('.cook_btn').click(cook);
+            $('#cb_cooked').change(toggle_trs());
         });
     </script>
 </head>
 <body>
     {% include 'web/header.html' %}
-    <table>
+    <label>
+        Показать/Скрыть приготовленные
+        <input type="checkbox" checked id="cb_cooked">
+    </label>
+    <table style="border-collapse:collapse; width:100%" border="1" id="product_table">
         <tr>
-            <th>Имя</th>
+            <th>Номер продукта</th>
+            <th>Имя продукта</th>
+            <th>Статус</th>
             <th>Готовить</th>
         </tr>
         {% for product in products %}
-            <tr>
+            <tr class="product_{{ product.number }} status_{{ product.status }}">
+                <td>{{ product.number }}</td>
                 <td>{{ product.name }}</td>
+                <td id="td_status_{{ product.number }}">{{ product.status_name }}</td>
                 <td>
                     <form>
-                        <button class="cook_btn" id="{{ product.id }}">
+                        <button class="cook_btn" id="{{ product.id }}"
+                                {% if product.status == 1 %} disabled {% endif %}>
                             Готовить
                         </button>
                     </form>

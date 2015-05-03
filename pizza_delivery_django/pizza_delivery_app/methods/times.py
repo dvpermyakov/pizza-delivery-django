@@ -1,7 +1,7 @@
-__author__ = 'dvpermyakov'
+import calendar
 
-import time
+__author__ = 'dvpermyakov'
 
 
 def timestamp(datetime_object):
-    return int(time.mktime(datetime_object.timetuple()))
+    return calendar.timegm(datetime_object.timetuple())

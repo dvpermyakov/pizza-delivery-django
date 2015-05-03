@@ -58,16 +58,26 @@ class Product(models.Model):
         VenueProduct.objects.filter(product=self).delete()
         self.delete()
 
+    def product_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'image_url': self.image_url
+        }
+
     def dict(self, venue=None):
         from venue import VenueProduct
-        return {
+        dict = self.product_dict()
+        dict.update({
             'id': self.id,
             'name': self.name,
             'description': self.description,
             'image_url': self.image_url,
             'venue_products': [venue_product.dict(product_include=False) for venue_product in self.venue_product.all()]
             if not venue else [VenueProduct.objects.get(venue=venue, product=self).dict(product_include=False)]
-        }
+        })
+        return dict
 
 
 class SingleModifier(models.Model):
