@@ -40,3 +40,8 @@ class Rating(models.Model):
     user = models.ForeignKey(User, related_name='rating')
     rating = models.FloatField()
     product = models.ForeignKey(Product)
+
+    @staticmethod
+    def get_product_rating(product):
+        ratings = Rating.objects.filter(product=product)
+        return sum([rating.rating for rating in ratings]) / float(len(ratings)) if ratings else 0.0, len(ratings)

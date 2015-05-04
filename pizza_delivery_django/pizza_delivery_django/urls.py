@@ -22,6 +22,7 @@ urlpatterns = patterns('',
     url(r'^api/check_order/$', api.check_order),
 
     url(r'^api/menu/$', api.menu),
+    url(r'^api/menu/item_info/$', api.menu_item_info),
     url(r'^api/menu/last_modified/$', api.last_modified_menu),
     url(r'^api/companies/$', api.companies),
     url(r'^api/venues/$', api.venues),

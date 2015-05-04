@@ -1,7 +1,7 @@
 # coding: utf-8
 import logging
 from django.http import JsonResponse, HttpResponseBadRequest
-from pizza_delivery_app.models import Venue
+from pizza_delivery_app.models import Venue, Product, Rating
 from pizza_delivery_app.methods.times import timestamp
 
 
@@ -50,3 +50,18 @@ def last_modified_menu(request):
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
+
+
+def menu_item_info(request):
+    product_id = request.GET.get('product_id')
+    try:
+        product = Product.objects.get(id=product_id)
+    except Product.DoesNotExist:
+        return HttpResponseBadRequest()
+    response = product.product_dict()
+    rating = Rating.get_product_rating(product)
+    response.update({
+        'rating': rating[0],
+        'amount': rating[1]
+    })
+    return JsonResponse(response)
