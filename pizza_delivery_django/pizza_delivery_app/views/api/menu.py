@@ -61,7 +61,7 @@ def menu_item_info(request):
     response = product.product_dict()
     rating = Rating.get_product_rating(product)
     response.update({
-        'rating': rating[0],
+        'rating_total': rating[0],
         'amount': rating[1]
     })
     return JsonResponse(response)
