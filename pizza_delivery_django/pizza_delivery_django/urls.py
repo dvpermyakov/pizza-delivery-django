@@ -17,6 +17,8 @@ urlpatterns = patterns('',
     url(r'^api/user/ratings/$', user.set_rating),
 
     url(r'^api/address/get_home/by_coordinates/$', api.get_home_by_coordinates),
+    url(r'^api/address/get_coordinates/by_home/$', api.get_coordinates_by_home),
+    url(r'^api/address/get_address/by_string/$', api.autocomplete_address),
 
     url(r'^api/order/$', api.order),
     url(r'^api/check_order/$', api.check_order),
