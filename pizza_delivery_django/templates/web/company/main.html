@@ -13,6 +13,7 @@
             <th>Название</th>
             <th>Адрес</th>
             <th>Статус</th>
+            <th>Зона доставки</th>
             <th>Меню</th>
             <th>Модификаторы</th>
         </tr>
@@ -21,6 +22,9 @@
                 <td>{{ venue.name }}</td>
                 <td>{{ venue.address_name }}</td>
                 <td>{{ venue.status }}</td>
+                <td>
+                    <a href="{{ '/web/venue/restriction_map?venue_id=%s'|percentage:venue.id }}">Зона доставки</a>
+                </td>
                 <td>
                     <a href="{{ '/web/%s/menu/'|percentage:venue.id }}">Меню</a>
                 </td>

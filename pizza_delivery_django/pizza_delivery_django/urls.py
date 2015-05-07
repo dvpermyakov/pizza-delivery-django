@@ -43,6 +43,7 @@ urlpatterns = patterns('',
 
     url(r'^web/venue/signup/$', venue.signup),
     url(r'^web/venue/map/$', venue.map_venues),
+    url(r'^web/venue/restriction_map/$', venue.restriction_map),
     url(r'^web/(?P<venue_id>\d+)/venue/main/$', venue.main_page),
     url(r'^web/venue/orders/confirm/$', venue.confirm_order),
     url(r'^web/venue/orders/deliver/$', venue.deliver_order),

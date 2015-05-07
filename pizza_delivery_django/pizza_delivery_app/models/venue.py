@@ -1,4 +1,5 @@
 # coding: utf-8
+import logging
 
 from django.db import models
 from address import Address, GeoRib
@@ -77,6 +78,23 @@ class Venue(models.Model):
             return cls.objects.get(manager_username=username)
         except Venue.DoesNotExist:
             return None
+
+    def is_included(self, address):
+        if not self.first_rib:
+            return False
+        from pizza_delivery_app.models import GeoPoint
+        c = GeoPoint(lat=address.lat, lon=address.lon)
+        d = GeoPoint(lat=90.0, lon=180)
+        amount = 0
+        for rib in self.first_rib.get_ribs():
+            a = rib.get_points()[0]
+            b = rib.get_points()[1]
+            result = GeoPoint.square(a, b, c) * GeoPoint.square(a, b, d) < 0.0 \
+                and GeoPoint.square(c, d, a) * GeoPoint.square(c, d, b) < 0.0
+            if result:
+                amount += 1
+        logging.error(amount)
+        return amount % 2 == 1
 
     def dict(self):
         return {
