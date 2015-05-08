@@ -9,7 +9,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from pizza_delivery_app.methods import map
 from pizza_delivery_app.models.address import Address
-from pizza_delivery_app.models.venue import Venue
+from pizza_delivery_app.models.venue import Venue, VenueProduct
 from pizza_delivery_app.models.menu import Category
 from pizza_delivery_app.models.company import Company
 from pizza_delivery_app.permissions.groups import MANAGER_GROUP, MENU_READ_PERMISSIONS
@@ -104,13 +104,13 @@ def signup(request):
             add_group(manager, MANAGER_GROUP)
             add_permissions(manager, [MENU_READ_PERMISSIONS])
             try:
-                first_category = Category.objects.get(id=form.cleaned_data['first_category'])
-            except Category.DoesNotExist:
+                copy_venue = Venue.objects.get(id=form.cleaned_data['first_category'])
+                first_category = copy_venue.first_category
+            except Venue.DoesNotExist:
                 first_category = None
 
             Venue.create(company=company, address=address, name=venue_name, description=description,
                          manager_username=manager.username, first_category=first_category)
-
             return redirect('/web/venue/map')
         else:
             return general_render(form)

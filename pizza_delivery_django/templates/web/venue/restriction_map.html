@@ -44,7 +44,6 @@
                 coords[i][0] = parseFloat("{{ coord.lat }}".replace(",", "."));
                 coords[i][1] = parseFloat("{{ coord.lon }}".replace(",", "."));
             {% endfor %}
-            alert(coords);
             var myPolygon = new ymaps.Polygon([
                 coords,
                 []

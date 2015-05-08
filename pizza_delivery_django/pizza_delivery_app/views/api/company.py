@@ -1,5 +1,6 @@
+import logging
 from django.http import JsonResponse, HttpResponseBadRequest
-from pizza_delivery_app.models import Company, Venue, Address
+from pizza_delivery_app.models import Venue, Address
 
 __author__ = 'dvpermyakov'
 
