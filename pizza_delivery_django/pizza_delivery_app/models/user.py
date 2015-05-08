@@ -45,3 +45,10 @@ class Rating(models.Model):
     def get_product_rating(product):
         ratings = Rating.objects.filter(product=product)
         return sum([rating.rating for rating in ratings]) / float(len(ratings)) if ratings else 0.0, len(ratings)
+
+    def dict(self):
+        return {
+            'user_id': self.user.id,
+            'rating': self.rating,
+            'product_id': self.product.id
+        }

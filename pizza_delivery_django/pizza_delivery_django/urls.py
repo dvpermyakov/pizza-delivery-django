@@ -29,6 +29,8 @@ urlpatterns = patterns('',
     url(r'^api/companies/$', api.companies),
     url(r'^api/venues/$', api.venues),
 
+    url(r'^tmp/rate/$', venue.set_ratings),  # todo: remove it
+
     url(r'^web/login/$', web.login),
     url(r'^web/logout/$', web.logout),
     url(r'^web/main/$', web.main_page),
