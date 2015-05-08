@@ -75,7 +75,7 @@ def get_preferences(request):  # collaborative filtering, slope one
             for other_user in other_users:
                 differ += Rating.objects.get(user=other_user, product=rate.product).rating - \
                           Rating.objects.get(user=other_user, product=product).rating
-            sum += differ * len(other_users)
+            sum += (rate.rating + differ) * len(other_users)
             amount += len(other_users)
         results.append({
             'product_id': rate.product.id,
