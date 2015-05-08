@@ -15,6 +15,7 @@ urlpatterns = patterns('',
     url(r'^api/user/payments/avail/$', user.available_payment_types),
     url(r'^api/user/history/$', user.order_history),
     url(r'^api/user/ratings/$', user.set_rating),
+    url(r'^api/user/get_preferences/$', user.get_preferences),
 
     url(r'^api/address/get_home/by_coordinates/$', api.get_home_by_coordinates),
     url(r'^api/address/get_coordinates/by_home/$', api.get_coordinates_by_home),
@@ -30,6 +31,7 @@ urlpatterns = patterns('',
     url(r'^api/venues/$', api.venues),
 
     url(r'^tmp/rate/$', venue.set_ratings),  # todo: remove it
+    url(r'^tmp/specific_user/$', venue.get_specific_user),  # todo: remove it
 
     url(r'^web/login/$', web.login),
     url(r'^web/logout/$', web.logout),

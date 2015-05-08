@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from pizza_delivery_app.models import Venue, User, Rating, Product
@@ -28,4 +29,13 @@ def set_ratings(request):
             rs.append(r)
     return JsonResponse({
         'ratings': [r.dict() for r in rs]
+    })
+
+
+def get_specific_user(request):
+    product1 = Product.objects.get(id=1)
+    product2 = Product.objects.get(id=2)
+    users = User.objects.filter(rating__product=product1).filter(rating__product=product2)
+    return JsonResponse({
+        'users': [user.dict() for user in users]
     })
