@@ -63,7 +63,9 @@ class Product(models.Model):
             'id': self.id,
             'name': self.name,
             'description': self.description,
-            'image_url': self.image_url
+            'image_url': self.image_url,
+            'first_category_id': self.category.get_first_category().id,
+            'company_id': self.category.get_first_category().venue.all()[0].company.id
         }
 
     def dict(self, venue=None):

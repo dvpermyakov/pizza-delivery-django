@@ -29,6 +29,7 @@ urlpatterns = patterns('',
     url(r'^api/menu/last_modified/$', api.last_modified_menu),
     url(r'^api/companies/$', api.companies),
     url(r'^api/venues/$', api.venues),
+    url(r'^api/venue/check/coordinates/$', api.check_coordinates),
 
     url(r'^tmp/rate/$', venue.set_ratings),  # todo: remove it
     url(r'^tmp/specific_user/$', venue.get_specific_user),  # todo: remove it

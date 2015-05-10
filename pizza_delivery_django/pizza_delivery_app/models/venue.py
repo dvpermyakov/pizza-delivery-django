@@ -16,7 +16,7 @@ class Venue(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=255)
     manager_username = models.CharField(max_length=255)
-    first_category = models.ForeignKey(Category)
+    first_category = models.ForeignKey(Category, related_name='venue')
     first_rib = models.ForeignKey(GeoRib, null=True)
     single_modifiers = models.ManyToManyField(SingleModifier)
     group_modifiers = models.ManyToManyField(GroupModifier)

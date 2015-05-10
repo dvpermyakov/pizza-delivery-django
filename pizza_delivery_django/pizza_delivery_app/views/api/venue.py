@@ -27,3 +27,21 @@ def venues(request):
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
+
+
+def check_coordinates(request):
+    venue_id = request.GET.get('venue_id')
+    try:
+        venue = Venue.objects.get(id=venue_id)
+    except Venue.DoesNotExist:
+        return HttpResponseBadRequest()
+    lat = request.GET.get('lat')
+    lon = request.GET.get('lon')
+    if not lat or not lon:
+        return HttpResponseBadRequest()
+    lat = float(lat)
+    lon = float(lon)
+    address = Address(lat=lat, lon=lon)
+    return JsonResponse({
+        'success': venue.is_included(address)
+    })
