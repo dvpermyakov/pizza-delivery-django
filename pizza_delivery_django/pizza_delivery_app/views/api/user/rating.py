@@ -34,6 +34,9 @@ def set_rating(request):
     })
 
 
+MAX_PREFERENCES = 5
+
+
 @csrf_exempt
 def get_preferences(request):  # collaborative filtering, slope one
     user_id = request.POST.get('user_id')
@@ -57,7 +60,7 @@ def get_preferences(request):  # collaborative filtering, slope one
             suited_categories.append(venue.first_category)
     products = []
     for venue in suited_venues:
-        products.extend(venue.get_menu(venue_product=False))
+        products.extend(venue.get_products_from_menu(venue_product=False))
     orders = Order.objects.filter(user=user, status=Order.CLOSED)
     for order in orders:
         for product in order.get_products():
@@ -66,10 +69,10 @@ def get_preferences(request):  # collaborative filtering, slope one
                 products.remove(product)
     ratings = Rating.objects.filter(user=user)
     results = []
-    for rate in ratings:
+    for product in products:
         sum = 0
         amount = 0
-        for product in products:
+        for rate in ratings:
             other_users = User.objects.filter(rating__product=rate.product).filter(rating__product=product)
             differ = 0
             for other_user in other_users:
@@ -78,9 +81,20 @@ def get_preferences(request):  # collaborative filtering, slope one
             sum += (rate.rating + differ) * len(other_users)
             amount += len(other_users)
         results.append({
-            'product_id': rate.product.id,
+            'product_id': product.id,
             'rating': sum / amount if amount else 0.0
         })
+    if len(results) > MAX_PREFERENCES:
+        remain_results = []
+        for i in xrange(MAX_PREFERENCES):
+            index = 0
+            for i, result in enumerate(results):
+                if result['rating'] > results[index]['rating']:
+                    index = i
+            remain_results.append(results[index])
+            results.remove(results[index])
+    else:
+        remain_results = results
     return JsonResponse({
-        'ratings': results
+        'ratings': remain_results
     })
