@@ -57,32 +57,35 @@ class Order(models.Model):
             self.status = self.CONFIRMED
             for product in OrderProduct.objects.filter(order=self):
                 CookedOrderedProduct(product=product, cook=Cook.get_cook_by_order_product(product)).save()
-            self._change_status()
             self.save()
+            self._change_status()
 
     def deliver(self):
         if self.status == self.COOKED:
             self.status = self.DELIVERING
-            self._change_status()
             self.save()
+            self._change_status()
 
     def close(self):
         if self.status == self.DELIVERING:
             self.status = self.CLOSED
-            self._change_status()
             self.save()
+            self._change_status()
 
     def check_status_after_cooking(self):
         self.save()
         if self.status == self.CONFIRMED:
             self.status = self.COOKING
             self.save()
-        for product in self.order_product.all():
+        products = self.order_product.all()
+        if not products:
+            return
+        for product in products:
             if product.status == OrderProduct.NEW:
                 return
         self.status = self.COOKED
-        self._change_status()
         self.save()
+        self._change_status()
 
 
 class OrderProduct(models.Model):
@@ -103,7 +106,7 @@ class OrderProduct(models.Model):
         if self.status == self.NEW:
             self.status = self.COOKED
             self.save()
-        self.order.check_status_after_cooking()
+            self.order.check_status_after_cooking()
 
     def dict(self):
         dict = self.venue_product.product_dict()
