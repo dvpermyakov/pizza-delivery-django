@@ -31,8 +31,7 @@ def signup(request):
     def general_render(form):
         values = {
             'form': form,
-            'title': 'Регистрация новой компании',
-            'company_signup': True
+            'title': 'Регистрация новой компании'
         }
         values.update(csrf(request))
         return render(request, 'web/signup.html', values)
