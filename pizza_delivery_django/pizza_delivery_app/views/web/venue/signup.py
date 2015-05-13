@@ -9,10 +9,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from pizza_delivery_app.methods import map
 from pizza_delivery_app.models.address import Address
-from pizza_delivery_app.models.venue import Venue, VenueProduct
-from pizza_delivery_app.models.menu import Category
+from pizza_delivery_app.models.venue import Venue
 from pizza_delivery_app.models.company import Company
-from pizza_delivery_app.permissions.groups import MANAGER_GROUP, MENU_READ_PERMISSIONS
+from pizza_delivery_app.permissions.groups import MANAGER_GROUP, MENU_READ_PERMISSIONS, ORDER_CRUD_PERMISSIONS
 from pizza_delivery_app.permissions.methods import add_group, add_permissions
 from django.contrib.auth.decorators import login_required, permission_required
 from pizza_delivery_app.methods.google_api import get_timezone
@@ -102,7 +101,7 @@ def signup(request):
 
             manager = User.objects.create_user(login, email, password)
             add_group(manager, MANAGER_GROUP)
-            add_permissions(manager, [MENU_READ_PERMISSIONS])
+            add_permissions(manager, [MENU_READ_PERMISSIONS, ORDER_CRUD_PERMISSIONS])
             try:
                 copy_venue = Venue.objects.get(id=form.cleaned_data['first_category'])
                 first_category = copy_venue.first_category

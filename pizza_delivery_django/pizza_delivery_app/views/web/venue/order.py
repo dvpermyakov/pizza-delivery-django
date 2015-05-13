@@ -11,7 +11,7 @@ __author__ = 'Administrator'
 
 
 @login_required
-@permission_required('pizza_delivery_app.crud_venues')
+@permission_required('pizza_delivery_app.crud_orders')
 def confirm_order(request):
     order_id = request.POST.get('order_id')
     try:
@@ -29,7 +29,7 @@ def confirm_order(request):
 
 
 @login_required
-@permission_required('pizza_delivery_app.crud_venues')
+@permission_required('pizza_delivery_app.crud_orders')
 def deliver_order(request):
     order_id = request.POST.get('order_id')
     try:
@@ -47,7 +47,7 @@ def deliver_order(request):
 
 
 @login_required
-@permission_required('pizza_delivery_app.crud_venues')
+@permission_required('pizza_delivery_app.crud_orders')
 def close_order(request):
     order_id = request.POST.get('order_id')
     try:
@@ -84,7 +84,7 @@ def _prepare_orders(orders):
 
 
 @login_required
-@permission_required('pizza_delivery_app.crud_venues')
+@permission_required('pizza_delivery_app.crud_orders')
 def order_list(request):
     venue = Venue.get_by_username(request.user.username)
     if not venue:
@@ -105,7 +105,7 @@ def order_list(request):
 
 
 @login_required
-@permission_required('pizza_delivery_app.crud_venues')
+@permission_required('pizza_delivery_app.crud_orders')
 def new_orders(request):
     venue = Venue.get_by_username(request.user.username)
     last_time = request.GET.get('last_time')
@@ -144,7 +144,7 @@ def new_orders(request):
 
 
 @login_required
-@permission_required('pizza_delivery_app.crud_venues')
+@permission_required('pizza_delivery_app.crud_orders')
 def update_statuses(request):
     orders = request.GET.get('orders')
     if not orders:

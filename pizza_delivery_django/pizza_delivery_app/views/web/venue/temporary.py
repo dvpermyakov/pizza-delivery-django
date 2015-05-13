@@ -1,4 +1,3 @@
-from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from pizza_delivery_app.models import Venue, User, Rating, Product
