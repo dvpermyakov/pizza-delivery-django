@@ -1,6 +1,7 @@
 # coding=utf-8
 import logging
 from django import forms
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.models import User
 from django.core.context_processors import csrf
 from django.http import HttpResponseForbidden
@@ -30,6 +31,8 @@ class KitchenForm(SignUpForm):
         return True
 
 
+@login_required
+@permission_required('pizza_delivery_app.crud_venues')
 def signup(request):
     def general_render(form):
         values = {

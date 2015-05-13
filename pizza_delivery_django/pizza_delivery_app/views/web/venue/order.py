@@ -1,4 +1,5 @@
 import logging
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.context_processors import csrf
 from django.http import HttpResponseBadRequest, JsonResponse, HttpResponseForbidden
 from pizza_delivery_app.models import Order, Venue, OrderProduct
@@ -9,6 +10,8 @@ from pizza_delivery_app.methods.times import timestamp
 __author__ = 'Administrator'
 
 
+@login_required
+@permission_required('pizza_delivery_app.crud_venues')
 def confirm_order(request):
     order_id = request.POST.get('order_id')
     try:
@@ -25,6 +28,8 @@ def confirm_order(request):
     })
 
 
+@login_required
+@permission_required('pizza_delivery_app.crud_venues')
 def deliver_order(request):
     order_id = request.POST.get('order_id')
     try:
@@ -41,6 +46,8 @@ def deliver_order(request):
     })
 
 
+@login_required
+@permission_required('pizza_delivery_app.crud_venues')
 def close_order(request):
     order_id = request.POST.get('order_id')
     try:
@@ -76,6 +83,8 @@ def _prepare_orders(orders):
     return orders, last_time
 
 
+@login_required
+@permission_required('pizza_delivery_app.crud_venues')
 def order_list(request):
     venue = Venue.get_by_username(request.user.username)
     if not venue:
@@ -95,6 +104,8 @@ def order_list(request):
     return render(request, 'web/venue/orders.html', values)
 
 
+@login_required
+@permission_required('pizza_delivery_app.crud_venues')
 def new_orders(request):
     venue = Venue.get_by_username(request.user.username)
     last_time = request.GET.get('last_time')
@@ -132,6 +143,8 @@ def new_orders(request):
         return HttpResponseBadRequest()
 
 
+@login_required
+@permission_required('pizza_delivery_app.crud_venues')
 def update_statuses(request):
     orders = request.GET.get('orders')
     if not orders:
